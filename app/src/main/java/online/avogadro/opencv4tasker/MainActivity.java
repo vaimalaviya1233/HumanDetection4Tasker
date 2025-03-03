@@ -44,8 +44,11 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == PICK_IMAGE && resultCode == RESULT_OK && data != null) {
             Uri selectedImage = data.getData();
             if (selectedImage!=null) {
-                testImagePath.setText(selectedImage.toString());
-                Log.d(TAG,"New file: "+selectedImage.toString());
+                String imagePath = selectedImage.toString();
+                testImagePath.setText(imagePath);
+                // Save the selected image path to SharedPreferences
+                SharedPreferencesHelper.save(this, SharedPreferencesHelper.LAST_IMAGE_PATH, imagePath);
+                Log.d(TAG,"New file: " + imagePath);
             }
         }
     }
@@ -75,6 +78,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         testImagePath = findViewById(R.id.testImagePath);
+        
+        // Restore the last selected image path from SharedPreferences
+        String lastImagePath = SharedPreferencesHelper.get(this, SharedPreferencesHelper.LAST_IMAGE_PATH);
+        if (lastImagePath != null && !lastImagePath.isEmpty()) {
+            testImagePath.setText(lastImagePath);
+        }
 
         // Check Claude API key and enable/disable Claude option
         RadioButton claudeButton = findViewById(R.id.radioEngineClaudeAI);

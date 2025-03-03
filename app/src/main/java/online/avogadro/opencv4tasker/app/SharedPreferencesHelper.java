@@ -10,6 +10,7 @@ public class SharedPreferencesHelper {
     private static final String PREFS_NAME = "MyAppPreferences";
     public static final String CLAUDE_API_KEY = "CLAUDE_API_KEY";
     public static final String GEMINI_API_KEY = "GEMINI_API_KEY";
+    public static final String LAST_IMAGE_PATH = "LAST_IMAGE_PATH";
     private static final String PASSWORD = "u2fg393ujk.%!kspa5fg393ujk.%!kra"; // Not recommended
 
     public static void save(Context context, String key, String value) {
