@@ -1,23 +1,8 @@
 package online.avogadro.opencv4tasker.claudeai;
 
 import android.content.Context;
-import android.content.res.AssetFileDescriptor;
 import android.util.Base64;
 import android.util.Log;
-
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.util.List;
-
-import online.avogadro.opencv4tasker.app.SharedPreferencesHelper;
-import online.avogadro.opencv4tasker.app.Util;
-
-import android.os.AsyncTask;
-import android.util.Base64;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,13 +17,16 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class HumansDetectorClaudeAI {
+import online.avogadro.opencv4tasker.ai.AIImageAnalyzer;
+import online.avogadro.opencv4tasker.app.SharedPreferencesHelper;
+import online.avogadro.opencv4tasker.app.Util;
+
+public class HumansDetectorClaudeAI implements AIImageAnalyzer {
 
     private String API_KEY = "YOUR_API_KEY_HERE";
     private static final String API_URL = "https://api.anthropic.com/v1/messages";
 
-    // private static final String PROMPT_SYSTEM = "The user will be providing images taken from cheap security cameras, these images might be taken during the day or the night and the angle may vary. Please reply him with a single keyword, chosen among these:\\n* HUMAN: an human or a part of an human is visible in the frame\\n* SPIDER: no humans are visible but a spider is near the camera\\n* NONE: neither an human nor a spider are in frame\\n* UNCERTAIN: you were unable to tell in which of the above categories the image might fit. Use this response if you are not totally sure that the answer is one of the above";
-    // private static final String PROMPT_SYSTEM = "The user will be providing images taken from cheap security cameras, these images might be taken during the day or the night and the angle may vary. Please reply him with a single keyword, chosen among these:\n* HUMAN: an human or a part of an human is visible in the frame\n* SPIDER: no humans are visible but a spider is near the camera\n* CAT: if it's an animal or a cat, it may be a cat walking away from the camera or walking toward the camera\n* NONE: neither an human nor a spider are in frame\n* UNCERTAIN: you were unable to tell in which of the above categories the image might fit. Use this response if you are not totally sure that the answer is one of the above\nIgnore any shadows";
+    // Default system prompt for human detection
     private static final String PROMPT_SYSTEM=
             "The user will be providing images taken from cheap security cameras, these images might be taken during the day or the night and the angle may vary. Images are usually taken top-down, during the night images may be blurry due to person's movements. Please reply him with a single keyword in the first line and a brief explanation of your choice in the second line, chosen among these:\n" +
             "* HUMAN: an human or a part of an human (usually on the border of the image) is visible in the frame. The human may be seen from above since the camera is usually mounted on an high position\n" +
@@ -69,10 +57,10 @@ public class HumansDetectorClaudeAI {
         return htc.detectPerson(context,path);
     }
 
+    @Override
     public void setup(Context ctx) throws IOException {
        API_KEY = SharedPreferencesHelper.get(ctx, SharedPreferencesHelper.CLAUDE_API_KEY);
     }
-
 
     public int detectPerson(Context ctx, String imagePath) {
         lastResponse = null;
@@ -80,7 +68,7 @@ public class HumansDetectorClaudeAI {
         String newPath = null;
         try {
             newPath = Util.contentToFile(ctx,imagePath);
-            String claudeResponse = makeApiCall(PROMPT_SYSTEM, null, newPath);
+            String claudeResponse = analyzeImage(PROMPT_SYSTEM, null, newPath);
             lastResponse = claudeResponse;
             String[] res=claudeResponse.split("\\r?\\n");
             if (res[0].trim().equals("HUMAN"))
@@ -104,12 +92,14 @@ public class HumansDetectorClaudeAI {
             if (newPath!=null && !newPath.equals(imagePath))
                 new File(newPath).delete();
         }
-
     }
 
+    @Override
     public String getLastResponse() {
         return lastResponse;
     }
+    
+    @Override
     public String getLastError() {
         String res = lastHttpResponse;
         if (lastException!=null)
@@ -117,7 +107,8 @@ public class HumansDetectorClaudeAI {
         return res;
     }
 
-    private String makeApiCall(String systemPrompt, String userPrompt, String imagePath) throws IOException, JSONException {
+    @Override
+    public String analyzeImage(String systemPrompt, String userPrompt, String imagePath) throws IOException, JSONException {
         lastHttpResponse = null;
         URL url = new URL(API_URL);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -136,11 +127,6 @@ public class HumansDetectorClaudeAI {
         jsonBody.put("system", systemPrompt);
 
         JSONArray messages = new JSONArray();
-
-//        JSONObject systemMessage = new JSONObject();
-//        systemMessage.put("role", "system");
-//        systemMessage.put("content", systemPrompt);
-//        messages.put(systemMessage);
 
         JSONObject userMessage = new JSONObject();
         userMessage.put("role", "user");
@@ -186,7 +172,6 @@ public class HumansDetectorClaudeAI {
                 }
             }
             throw new IOException("No text response found: "+response.toString());
-            // return jsonResponse.getJSONObject("content").getString("text");
         } else {
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String inputLine;
@@ -197,9 +182,9 @@ public class HumansDetectorClaudeAI {
             in.close();
             String r = response.toString();
             throw new IOException("Error "+responseCode+" "+r);
-            // return "Error: " + responseCode;
         }
     }
+    
     private String encodeImageToBase64(String imagePath) throws IOException {
         File file = new File(imagePath);
         byte[] bytes = new byte[(int) file.length()];

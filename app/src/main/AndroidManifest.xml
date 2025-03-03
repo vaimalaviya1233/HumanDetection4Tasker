@@ -38,12 +38,22 @@
             </intent-filter>
         </activity>
 
-        <!-- Tasker plugin entry point -->
+        <!-- Tasker plugin entry points -->
         <activity
             android:name="online.avogadro.opencv4tasker.tasker.ActivityConfigDetectHumansAction"
             android:exported="true"
             android:icon="@mipmap/human_detection"
             android:label="Detect humans in the picture">
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
+            </intent-filter>
+        </activity>
+        
+        <activity
+            android:name="online.avogadro.opencv4tasker.tasker.ActivityConfigAnalyzeImageAction"
+            android:exported="true"
+            android:icon="@mipmap/opencv4tasker"
+            android:label="Analyze image with AI">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
             </intent-filter>

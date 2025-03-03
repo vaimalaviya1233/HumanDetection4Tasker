@@ -17,10 +17,11 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import online.avogadro.opencv4tasker.ai.AIImageAnalyzer;
 import online.avogadro.opencv4tasker.app.SharedPreferencesHelper;
 import online.avogadro.opencv4tasker.app.Util;
 
-public class HumansDetectorGemini {
+public class HumansDetectorGemini implements AIImageAnalyzer {
 
     private String API_KEY = "YOUR_API_KEY_HERE";
     private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
@@ -55,6 +56,7 @@ public class HumansDetectorGemini {
         return htg.detectPerson(context, path);
     }
 
+    @Override
     public void setup(Context ctx) throws IOException {
         API_KEY = SharedPreferencesHelper.get(ctx, SharedPreferencesHelper.GEMINI_API_KEY);
     }
@@ -65,7 +67,7 @@ public class HumansDetectorGemini {
         String newPath = null;
         try {
             newPath = Util.contentToFile(ctx, imagePath);
-            String geminiResponse = makeApiCall(PROMPT_SYSTEM, null, newPath);
+            String geminiResponse = analyzeImage(PROMPT_SYSTEM, null, newPath);
             lastResponse = geminiResponse;
             String[] res = geminiResponse.split("\\r?\\n");
             if (res[0].trim().equals("HUMAN"))
@@ -91,10 +93,12 @@ public class HumansDetectorGemini {
         }
     }
 
+    @Override
     public String getLastResponse() {
         return lastResponse;
     }
 
+    @Override
     public String getLastError() {
         String res = lastHttpResponse;
         if (lastException != null)
@@ -102,7 +106,8 @@ public class HumansDetectorGemini {
         return res;
     }
 
-    private String makeApiCall(String systemPrompt, String userPrompt, String imagePath) throws IOException, JSONException {
+    @Override
+    public String analyzeImage(String systemPrompt, String userPrompt, String imagePath) throws IOException, JSONException {
         lastHttpResponse = null;
         // API Key is included in the URL for Gemini API
         URL url = new URL(API_URL + "?key=" + API_KEY);
