@@ -2,6 +2,10 @@ Plugin app for Tasker and MacroDroid to provide Humans Detection
 
 Licensed under GPL v3
 
+V 1.2.0 
+* ADDED: Google Gemini supporto
+* IMPROVED: test file selector will remember the last image (also for file picker)
+
 V 1.1.0 
 * remove OpenCV support
 * added Tensorflow Lite support

@@ -9,6 +9,7 @@ import online.avogadro.opencv4tasker.tensorflowlite.HumansDetectorTensorFlow;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.DocumentsContract;
 
 // import org.opencv.android.OpenCVLoader;
 
@@ -125,6 +126,20 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(Intent.ACTION_PICK);
                 intent.setType("image/*");
+                
+                // Try to set initial URI to current image path
+                String currentPath = testImagePath.getText().toString();
+                if (!currentPath.isEmpty()) {
+                    try {
+                        Uri initialUri = Uri.parse(currentPath);
+                        // For Android 8.0 (API 26) and higher
+                        intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, initialUri);
+                        Log.d(TAG, "Setting initial URI: " + initialUri);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error setting initial URI: " + e.getMessage());
+                    }
+                }
+                
                 startActivityForResult(intent, PICK_IMAGE);
             }
         });
