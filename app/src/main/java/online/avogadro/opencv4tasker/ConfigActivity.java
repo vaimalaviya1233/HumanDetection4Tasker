@@ -21,27 +21,42 @@ public class ConfigActivity extends AppCompatActivity {
     private static final String TAG = "ConfigActivity";
 
     EditText claudeApiKey;
+    EditText geminiApiKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_config);
 
+        // Configure Claude API key
         claudeApiKey = findViewById(R.id.claudeApiKey);
-        String val = SharedPreferencesHelper.get(this,SharedPreferencesHelper.CLAUDE_API_KEY);
-        if (val!=null)
-            claudeApiKey.setText(val);
+        String claudeVal = SharedPreferencesHelper.get(this, SharedPreferencesHelper.CLAUDE_API_KEY);
+        if (claudeVal != null)
+            claudeApiKey.setText(claudeVal);
+            
+        // Configure Gemini API key
+        geminiApiKey = findViewById(R.id.geminiApiKey);
+        String geminiVal = SharedPreferencesHelper.get(this, SharedPreferencesHelper.GEMINI_API_KEY);
+        if (geminiVal != null)
+            geminiApiKey.setText(geminiVal);
 
         findViewById(R.id.buttonSave).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Save Claude API key
                 SharedPreferencesHelper.save(
                         ConfigActivity.this,
                         SharedPreferencesHelper.CLAUDE_API_KEY,
-                        claudeApiKey.getText().toString() );
+                        claudeApiKey.getText().toString());
+                
+                // Save Gemini API key
+                SharedPreferencesHelper.save(
+                        ConfigActivity.this,
+                        SharedPreferencesHelper.GEMINI_API_KEY,
+                        geminiApiKey.getText().toString());
+                        
                 finish(); // return to main activity
             }
         });
-
     }
 }

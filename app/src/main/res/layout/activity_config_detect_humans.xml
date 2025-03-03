@@ -36,6 +36,12 @@
             android:text="Claude.AI (online)" />
 
         <RadioButton
+            android:id="@+id/radioEngineGemini"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Gemini (online)" />
+
+        <RadioButton
             android:id="@+id/radioEngineTensorflowLite"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -3,6 +3,7 @@ package online.avogadro.opencv4tasker;
 import androidx.appcompat.app.AppCompatActivity;
 import online.avogadro.opencv4tasker.app.SharedPreferencesHelper;
 import online.avogadro.opencv4tasker.claudeai.HumansDetectorClaudeAI;
+import online.avogadro.opencv4tasker.gemini.HumansDetectorGemini;
 import online.avogadro.opencv4tasker.tensorflowlite.HumansDetectorTensorFlow;
 
 import android.content.Intent;
@@ -30,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
     static final String ENGINE_CLAUDE_AI = "CLAUDE";
     static final String ENGINE_TENSORFLOW = "TENSORFLOW";
+    static final String ENGINE_GEMINI = "GEMINI";
 
     EditText testImagePath;
 
@@ -52,11 +54,19 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
+        // Check Claude API key and enable/disable Claude option
         RadioButton claudeButton = findViewById(R.id.radioEngineClaudeAI);
         if ("".equals(SharedPreferencesHelper.get(this, SharedPreferencesHelper.CLAUDE_API_KEY)))
             claudeButton.setEnabled(false);
         else
             claudeButton.setEnabled(true);
+        
+        // Check Gemini API key and enable/disable Gemini option
+        RadioButton geminiButton = findViewById(R.id.radioEngineGemini);
+        if ("".equals(SharedPreferencesHelper.get(this, SharedPreferencesHelper.GEMINI_API_KEY)))
+            geminiButton.setEnabled(false);
+        else
+            geminiButton.setEnabled(true);
     }
 
     @Override
@@ -66,11 +76,19 @@ public class MainActivity extends AppCompatActivity {
 
         testImagePath = findViewById(R.id.testImagePath);
 
+        // Check Claude API key and enable/disable Claude option
         RadioButton claudeButton = findViewById(R.id.radioEngineClaudeAI);
         if ("".equals(SharedPreferencesHelper.get(this, SharedPreferencesHelper.CLAUDE_API_KEY)))
             claudeButton.setEnabled(false);
         else
             claudeButton.setEnabled(true);
+            
+        // Check Gemini API key and enable/disable Gemini option
+        RadioButton geminiButton = findViewById(R.id.radioEngineGemini);
+        if ("".equals(SharedPreferencesHelper.get(this, SharedPreferencesHelper.GEMINI_API_KEY)))
+            geminiButton.setEnabled(false);
+        else
+            geminiButton.setEnabled(true);
 
         findViewById(R.id.buttonTest).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -113,12 +131,18 @@ public class MainActivity extends AppCompatActivity {
     private void processImage(String imageUri) {
         TextView resultTextView = findViewById(R.id.resultTextView);
         resultTextView.setText("processing...");
-        String engine = ENGINE_CLAUDE_AI;
-        RadioButton radioGoogle =(RadioButton)findViewById(R.id.radioEngineTensorflowLite);
+        String engine;
+        
+        // Determine which engine is selected
+        RadioButton radioTensorflow = (RadioButton)findViewById(R.id.radioEngineTensorflowLite);
+        RadioButton radioGemini = (RadioButton)findViewById(R.id.radioEngineGemini);
+        RadioButton radioClaude = (RadioButton)findViewById(R.id.radioEngineClaudeAI);
 
         int detectionScore = -99;
-        if (radioGoogle.isChecked()) {
+        if (radioTensorflow.isChecked()) {
             engine = ENGINE_TENSORFLOW;
+        } else if (radioGemini.isChecked()) {
+            engine = ENGINE_GEMINI;
         } else {
             engine = ENGINE_CLAUDE_AI;
         }
@@ -148,6 +172,30 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     resultTextView.setText("Detection score: "+detectionScore+" "+engine);
                 }
+            } else if (engine==ENGINE_GEMINI) {
+                // Use Gemini API
+                ExecutorService executor = Executors.newSingleThreadExecutor();
+                Handler handler = new Handler(Looper.getMainLooper());
+                executor.execute(() -> {
+                    try {
+                        // Background work here
+                        HumansDetectorGemini h = new HumansDetectorGemini();
+                        h.setup(this);
+                        int result = h.detectPerson(this, imageUri);
+
+                        handler.post(() -> {
+                            // UI Thread work here
+                            if (result!=-1)
+                                resultTextView.setText("Detection score: "+result+" "+ENGINE_GEMINI+"\n"+h.getLastResponse());
+                            else
+                                resultTextView.setText("Detection failure: "+h.getLastError());
+                        });
+                    } catch (IOException e) {
+                        handler.post(() -> {
+                            resultTextView.setText("Detection error: " + e.getMessage());
+                        });
+                    }
+                });
             } else {    // default = Claude
                 ExecutorService executor = Executors.newSingleThreadExecutor();
                 Handler handler = new Handler(Looper.getMainLooper());
@@ -171,7 +219,6 @@ public class MainActivity extends AppCompatActivity {
                         });
                     }
                 });
-
             }
         } catch (IOException e) {
             resultTextView.setText("Failed to execute detection "+e.getMessage());

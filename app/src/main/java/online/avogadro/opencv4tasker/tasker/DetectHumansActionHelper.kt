@@ -13,10 +13,12 @@ import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultSucess
 import online.avogadro.opencv4tasker.app.SharedPreferencesHelper
 import online.avogadro.opencv4tasker.claudeai.HumansDetectorClaudeAI
 import online.avogadro.opencv4tasker.databinding.ActivityConfigDetectHumansBinding;
+import online.avogadro.opencv4tasker.gemini.HumansDetectorGemini
 import online.avogadro.opencv4tasker.tensorflowlite.HumansDetectorTensorFlow
 
 const val ENGINE_CLAUDEAI = "CLAUDE"
 const val ENGINE_TENSORFLOW = "TENSORFLOW"
+const val ENGINE_GEMINI = "GEMINI"
 
 class DetectHumansActionHelper(config: TaskerPluginConfig<DetectHumansInput>) : TaskerPluginConfigHelper<DetectHumansInput, DetectHumansOutput, DetectHumansActionRunner>(config) {
     override val runnerClass: Class<DetectHumansActionRunner> get() = DetectHumansActionRunner::class.java
@@ -34,29 +36,54 @@ class ActivityConfigDetectHumansAction : Activity(), TaskerPluginConfig<DetectHu
     override fun assignFromInput(input: TaskerInput<DetectHumansInput>) {
         binding?.editFileName?.setText(input.regular.imagePath);
 
+        // Reset all radio buttons
+        binding?.radioEngineClaudeAI?.isChecked = false
+        binding?.radioEngineGemini?.isChecked = false
+        binding?.radioEngineTensorflowLite?.isChecked = false
+
+        // Set the appropriate radio button based on the engine
         if (ENGINE_CLAUDEAI.equals(input.regular.engine)) {
-            binding?.radioEngineClaudeAI?.isChecked=true;
-            binding?.radioEngineTensorflowLite?.isChecked=false;
+            binding?.radioEngineClaudeAI?.isChecked = true
+        } else if (ENGINE_GEMINI.equals(input.regular.engine)) {
+            binding?.radioEngineGemini?.isChecked = true
         } else { // null or anything else
             // Local Tensorflow == default (backward compatibility!)
-            binding?.radioEngineClaudeAI?.isChecked=false;
-            binding?.radioEngineTensorflowLite?.isChecked=true;
+            binding?.radioEngineTensorflowLite?.isChecked = true
         }
 
         // disable Claude options if there's no API KEY
-        var apiKey = SharedPreferencesHelper.get(this, SharedPreferencesHelper.CLAUDE_API_KEY)
-        if ("".equals(apiKey)) {
+        var claudeApiKey = SharedPreferencesHelper.get(this, SharedPreferencesHelper.CLAUDE_API_KEY)
+        if ("".equals(claudeApiKey)) {
             binding?.radioEngineClaudeAI?.isEnabled = false
             binding?.radioEngineClaudeAI?.isChecked = false
-            binding?.radioEngineTensorflowLite?.isChecked=true
+            
+            // Default to TensorFlow if Claude was selected but now disabled
+            if (ENGINE_CLAUDEAI.equals(input.regular.engine)) {
+                binding?.radioEngineTensorflowLite?.isChecked = true
+            }
+        }
+
+        // disable Gemini options if there's no API KEY
+        var geminiApiKey = SharedPreferencesHelper.get(this, SharedPreferencesHelper.GEMINI_API_KEY)
+        if ("".equals(geminiApiKey)) {
+            binding?.radioEngineGemini?.isEnabled = false
+            binding?.radioEngineGemini?.isChecked = false
+            
+            // Default to TensorFlow if Gemini was selected but now disabled
+            if (ENGINE_GEMINI.equals(input.regular.engine)) {
+                binding?.radioEngineTensorflowLite?.isChecked = true
+            }
         }
     }
 
     override val inputForTasker: TaskerInput<DetectHumansInput> get() {
         var engine = ENGINE_TENSORFLOW  // fail-safe local default
-        if (binding?.radioEngineClaudeAI?.isChecked()==true)
+        if (binding?.radioEngineClaudeAI?.isChecked == true) {
             engine = ENGINE_CLAUDEAI
-        return TaskerInput<DetectHumansInput>(DetectHumansInput(binding?.editFileName?.text?.toString(),engine))
+        } else if (binding?.radioEngineGemini?.isChecked == true) {
+            engine = ENGINE_GEMINI
+        }
+        return TaskerInput<DetectHumansInput>(DetectHumansInput(binding?.editFileName?.text?.toString(), engine))
     }
 
     override val context get() = applicationContext
@@ -88,7 +115,14 @@ class DetectHumansActionRunner : TaskerPluginRunnerAction<DetectHumansInput, Det
             result = htc.detectPerson(context, input.regular.imagePath)
             resultReason = htc.getLastResponse()
             if (result==-1)
-                resultError = htc.lastError
+                resultError = htc.getLastError()
+        } else if (ENGINE_GEMINI.equals(input.regular.engine)) {
+            val htg = HumansDetectorGemini()
+            htg.setup(context)
+            result = htg.detectPerson(context, input.regular.imagePath)
+            resultReason = htg.getLastResponse()
+            if (result==-1)
+                resultError = htg.getLastError()
         } else {
             // default = TENSORFLOW
             var path = input.regular.imagePath;
