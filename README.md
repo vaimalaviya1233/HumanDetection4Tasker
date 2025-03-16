@@ -3,7 +3,7 @@ Plugin app for Tasker and MacroDroid to provide Humans Detection
 Licensed under GPL v3
 
 V 1.3.0
-* ADDED: new event allowing to perform a general purpose imag analysis using Gemini or Claude
+* ADDED: new event allowing to perform a general purpose image analysis using Gemini or Claude
 
 V 1.2.0 
 * ADDED: Google Gemini support
