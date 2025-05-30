@@ -19,6 +19,7 @@ V 1.0.2
 
 Features:
 * Provides a tasker action capable to open an image and return a score 0-100 in term of how likely the image contains a person
+* Provides a tasker action that you can use to ask generic questions to Claude/Gemini regarding an image/text
 * simple home screen to test it against local images
 * can parse file names in the form of content://media/external/images/something or in form file:///sdcard/somewhere/file.jpg
 * can parse PNG and JPG (tensorflow) or JPG (Claude)
@@ -52,6 +53,12 @@ HOW-TO test it:
 * use the file picker to choose an image
 * press the "test recognition" button
 * see what's the score
+
+Example usage for the generic question:
+* image: the image you want to analyze
+* system prompt:  
+* user prompt: <empty>
+
 
 E.g. my use case is simple: I want to reduce to almost zero the false positive alarms of some security cameras 
 * listen for alerts from (cheap?) security cameras
