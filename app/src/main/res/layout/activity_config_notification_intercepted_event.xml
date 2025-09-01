@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="online.avogadro.opencv4tasker.tasker.ActivityConfigNotificationInterceptedEvent"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Notification Interception"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="This event will trigger when notifications with images are received from any app."
+        android:layout_marginBottom="16dp" />
+
+    <CheckBox
+        android:id="@+id/checkboxEnabled"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Enable notification monitoring"
+        android:checked="true"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Note: You will need to grant notification access permission for this app in Android settings."
+        android:textSize="12sp"
+        android:textStyle="italic"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Output Variables:"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="• %notification_title - The notification title\n• %notification_text - The notification text\n• %image_path - Path to extracted image\n• %app_package - App package name\n• %app_name - App display name"
+        android:textSize="12sp"
+        android:layout_marginBottom="24dp" />
+
+    <Button
+        android:id="@+id/buttonOK"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="OK" />
+
+</LinearLayout>

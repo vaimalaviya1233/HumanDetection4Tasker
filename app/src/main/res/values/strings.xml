@@ -3,4 +3,16 @@
     <string name="com_user_name">account</string>
     <string name="toast_success">Success</string>
     <string name="toast_fail">Failed</string>
+    
+    <!-- Notification Event Strings -->
+    <string name="notification_title_label">Notification Title</string>
+    <string name="notification_title_description">The title of the intercepted notification</string>
+    <string name="notification_text_label">Notification Text</string>
+    <string name="notification_text_description">The text content of the intercepted notification</string>
+    <string name="image_path_label">Image Path</string>
+    <string name="image_path_description">Path to the extracted notification image</string>
+    <string name="app_package_label">App Package</string>
+    <string name="app_package_description">Package name of the app that sent the notification</string>
+    <string name="app_name_label">App Name</string>
+    <string name="app_name_description">Human-readable name of the app that sent the notification</string>
 </resources>

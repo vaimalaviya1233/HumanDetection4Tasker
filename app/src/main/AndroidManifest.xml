@@ -16,6 +16,9 @@
     <!-- TASKER PLUGIN -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    
+    <!-- NOTIFICATION INTERCEPTION -->
+    <uses-permission android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" />
 
     <application
         android:name="online.avogadro.opencv4tasker.app.OpenCV4TaskerApplication"
@@ -54,6 +57,26 @@
             android:exported="true"
             android:icon="@mipmap/opencv4tasker"
             android:label="Analyze image with AI">
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
+            </intent-filter>
+        </activity>
+
+        <!-- Notification Listener Service -->
+        <service android:name="online.avogadro.opencv4tasker.notification.NotificationInterceptorService"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
+        <!-- Tasker plugin entry point for notification event -->
+        <activity
+            android:name="online.avogadro.opencv4tasker.tasker.ActivityConfigNotificationInterceptedEvent"
+            android:exported="true"
+            android:icon="@mipmap/opencv4tasker"
+            android:label="Notification Intercepted">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
             </intent-filter>
