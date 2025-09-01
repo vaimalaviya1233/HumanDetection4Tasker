@@ -66,3 +66,10 @@ E.g. my use case is simple: I want to reduce to almost zero the false positive a
 * pass the image to this plugin
 * if the detection_score>=50 then start the siren/lights
 * otherwise just ignore the false positive
+
+
+E.g. the AI Image Analysis opens the door to more sofisticated workflows:
+* Task: check if I remembered to park the car in the backyard or left it parked in the road in front of the house. I use the backyard security cam to check that
+* image: the image from your security camera (I use my plugin here to do that: https://github.com/SimoneAvogadro/CloudEdge4Tasker )
+* system prompt: Respond with a single word (CAR or NO_CAR) because your response will be fed into an automation workflow
+* user prompt: Please analize the image and respond with a single word: CAR or NO_CAR. If there's a car then return CAR, otherwise return NO_CAR

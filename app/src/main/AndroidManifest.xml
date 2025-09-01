@@ -24,9 +24,9 @@
         android:name="online.avogadro.opencv4tasker.app.OpenCV4TaskerApplication"
         android:requestLegacyExternalStorage="true"
         android:allowBackup="true"
-        android:icon="@mipmap/opencv4tasker"
+        android:icon="@mipmap/ai_image_analyzer"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/opencv4tasker"
+        android:roundIcon="@mipmap/ai_image_analyzer_round"
         android:theme="@style/AppTheme">
         <activity android:name="online.avogadro.opencv4tasker.MainActivity" />
         <activity android:name="online.avogadro.opencv4tasker.ConfigActivity" />
@@ -55,7 +55,7 @@
         <activity
             android:name="online.avogadro.opencv4tasker.tasker.ActivityConfigAnalyzeImageAction"
             android:exported="true"
-            android:icon="@mipmap/opencv4tasker"
+            android:icon="@mipmap/ai_image_analyzer"
             android:label="Analyze image with AI">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />

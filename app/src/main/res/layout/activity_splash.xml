@@ -4,11 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="online.avogadro.opencv4tasker.SplashActivity">
+
     <ImageView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:contentDescription="@null"
         android:scaleType="centerCrop"
-        android:src="@drawable/bg_splash"
-        android:contentDescription="@null"/>
+        android:src="@drawable/bg_splash" />
 
 </RelativeLayout>
