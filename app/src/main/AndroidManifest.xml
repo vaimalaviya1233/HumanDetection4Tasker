@@ -75,10 +75,10 @@
         <activity
             android:name="online.avogadro.opencv4tasker.tasker.ActivityConfigNotificationInterceptedEvent"
             android:exported="true"
-            android:icon="@mipmap/opencv4tasker"
+            android:icon="@mipmap/ai_image_analyzer"
             android:label="Notification Intercepted">
             <intent-filter>
-                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
+                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_CONDITION" />
             </intent-filter>
         </activity>
 
