@@ -17,7 +17,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="This event will trigger when notifications with images are received from any app."
+        android:text="This event will trigger when notifications with images are received from matching apps."
         android:layout_marginBottom="16dp" />
 
     <CheckBox
@@ -26,6 +26,29 @@
         android:layout_height="wrap_content"
         android:text="Enable notification monitoring"
         android:checked="true"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="App Name Filter (optional):"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <EditText
+        android:id="@+id/editTextAppFilter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter app name to filter (e.g. 'keep' for Google Keep)"
+        android:inputType="text"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Leave empty to monitor all apps. Filter is case-insensitive."
+        android:textSize="12sp"
+        android:textStyle="italic"
         android:layout_marginBottom="16dp" />
 
     <TextView

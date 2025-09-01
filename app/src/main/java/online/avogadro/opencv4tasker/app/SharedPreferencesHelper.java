@@ -11,6 +11,8 @@ public class SharedPreferencesHelper {
     public static final String CLAUDE_API_KEY = "CLAUDE_API_KEY";
     public static final String GEMINI_API_KEY = "GEMINI_API_KEY";
     public static final String LAST_IMAGE_PATH = "LAST_IMAGE_PATH";
+    public static final String NOTIFICATION_EVENT_ENABLED = "NOTIFICATION_EVENT_ENABLED";
+    public static final String NOTIFICATION_EVENT_APP_FILTER = "NOTIFICATION_EVENT_APP_FILTER";
     private static final String PASSWORD = "u2fg393ujk.%!kspa5fg393ujk.%!kra"; // Not recommended
 
     public static void save(Context context, String key, String value) {
@@ -25,6 +27,16 @@ public class SharedPreferencesHelper {
         if ("".equals(val))
             return val;
         return decrypt(val, PASSWORD);
+    }
+
+    public static void saveBoolean(Context context, String key, boolean value) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putBoolean(key, value).apply();
+    }
+
+    public static boolean getBoolean(Context context, String key, boolean defaultValue) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return prefs.getBoolean(key, defaultValue);
     }
 
     private static String encrypt(String value, String password) {

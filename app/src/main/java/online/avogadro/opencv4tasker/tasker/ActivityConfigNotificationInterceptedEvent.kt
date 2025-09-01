@@ -11,6 +11,7 @@ import com.joaomgcd.taskerpluginlibrary.config.TaskerPluginConfig
 import com.joaomgcd.taskerpluginlibrary.input.TaskerInput
 import online.avogadro.opencv4tasker.databinding.ActivityConfigNotificationInterceptedEventBinding
 import online.avogadro.opencv4tasker.notification.NotificationInterceptorService
+import online.avogadro.opencv4tasker.app.SharedPreferencesHelper
 
 class ActivityConfigNotificationInterceptedEvent : Activity(), TaskerPluginConfig<NotificationInterceptedEventInput> {
 
@@ -22,12 +23,16 @@ class ActivityConfigNotificationInterceptedEvent : Activity(), TaskerPluginConfi
     private lateinit var binding: ActivityConfigNotificationInterceptedEventBinding
 
     override fun assignFromInput(input: TaskerInput<NotificationInterceptedEventInput>) {
-        // Set the checkbox state based on the input
+        // Set the checkbox and text field state based on the input
         binding.checkboxEnabled.isChecked = input.regular.enabled
+        binding.editTextAppFilter.setText(input.regular.appNameFilter)
     }
 
     override val inputForTasker: TaskerInput<NotificationInterceptedEventInput> 
-        get() = TaskerInput(NotificationInterceptedEventInput(enabled = binding.checkboxEnabled.isChecked))
+        get() = TaskerInput(NotificationInterceptedEventInput(
+            enabled = binding.checkboxEnabled.isChecked,
+            appNameFilter = binding.editTextAppFilter.text.toString().trim()
+        ))
 
     override val context get() = applicationContext
     private val taskerHelper by lazy { NotificationInterceptedEventHelper(this) }
@@ -130,6 +135,21 @@ class ActivityConfigNotificationInterceptedEvent : Activity(), TaskerPluginConfi
 
     private fun finishConfiguration() {
         Log.d(TAG, "Finishing configuration with enabled = ${binding.checkboxEnabled.isChecked}")
+        
+        // Save configuration to SharedPreferences so the service can access it
+        SharedPreferencesHelper.saveBoolean(
+            this, 
+            SharedPreferencesHelper.NOTIFICATION_EVENT_ENABLED, 
+            binding.checkboxEnabled.isChecked
+        )
+        SharedPreferencesHelper.save(
+            this, 
+            SharedPreferencesHelper.NOTIFICATION_EVENT_APP_FILTER, 
+            binding.editTextAppFilter.text.toString().trim()
+        )
+        
+        Log.d(TAG, "Configuration saved: enabled=${binding.checkboxEnabled.isChecked}, filter='${binding.editTextAppFilter.text.toString().trim()}'")
+        
         taskerHelper.finishForTasker()
     }
 }

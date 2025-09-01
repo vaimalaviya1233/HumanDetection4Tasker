@@ -14,6 +14,7 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import online.avogadro.opencv4tasker.tasker.NotificationInterceptedEvent
+import online.avogadro.opencv4tasker.app.SharedPreferencesHelper
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -40,12 +41,39 @@ class NotificationInterceptorService : NotificationListenerService() {
         try {
             Log.d(TAG, "Notification posted from ${sbn.packageName}")
             
+            // Check if event is enabled
+            val isEventEnabled = SharedPreferencesHelper.getBoolean(
+                this, 
+                SharedPreferencesHelper.NOTIFICATION_EVENT_ENABLED, 
+                false
+            )
+            
+            if (!isEventEnabled) {
+                Log.d(TAG, "Notification event is disabled, ignoring")
+                return
+            }
+            
             // Extract basic notification info
             val notification = sbn.notification
             val packageName = sbn.packageName
             
             // Get app name
             val appName = getApplicationName(packageName)
+            
+            // Check app name filter
+            val appNameFilter = SharedPreferencesHelper.get(
+                this, 
+                SharedPreferencesHelper.NOTIFICATION_EVENT_APP_FILTER
+            )
+            
+            if (appNameFilter.isNotEmpty()) {
+                val matchesFilter = appName.contains(appNameFilter, ignoreCase = true)
+                if (!matchesFilter) {
+                    Log.d(TAG, "App name '$appName' does not contain filter '$appNameFilter', ignoring")
+                    return
+                }
+                Log.d(TAG, "App name '$appName' matches filter '$appNameFilter'")
+            }
             
             // Extract notification text
             val title = notification.extras.getString(Notification.EXTRA_TITLE) ?: ""
