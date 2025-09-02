@@ -1,25 +1,19 @@
 package online.avogadro.opencv4tasker.notification
 
 import android.app.Notification
-import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
-import android.graphics.drawable.Icon
-import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
-import online.avogadro.opencv4tasker.tasker.NotificationInterceptedEvent
+import online.avogadro.opencv4tasker.app.OpenCV4TaskerApplication
 import online.avogadro.opencv4tasker.app.SharedPreferencesHelper
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
+import online.avogadro.opencv4tasker.tasker.NotificationInterceptedEvent
+import online.avogadro.opencv4tasker.tasker.NotificationRaiser
 
 class NotificationInterceptorService : NotificationListenerService() {
+
+    private val DEBUG=true;
 
     companion object {
         private const val TAG = "NotificationInterceptor"
@@ -59,7 +53,19 @@ class NotificationInterceptorService : NotificationListenerService() {
             
             // Get app name
             val appName = getApplicationName(packageName)
-            
+
+            // Extract notification text
+            val title = notification.extras.getString(Notification.EXTRA_TITLE) ?: ""
+            val text = notification.extras.getString(Notification.EXTRA_TEXT) ?: ""
+
+            if (DEBUG) {
+                // Trigger debug event with all notification.extras values
+                val debugText = buildDebugText(sbn.notification)
+                triggerTaskerEvent(title, debugText, "",packageName, appName );
+                // triggerDebugEvent(debugText, sbn.packageName)
+                return;
+            }
+
             // Check app name filter
             val appNameFilter = SharedPreferencesHelper.get(
                 this, 
@@ -75,10 +81,7 @@ class NotificationInterceptorService : NotificationListenerService() {
                 Log.d(TAG, "App name '$appName' matches filter '$appNameFilter'")
             }
             
-            // Extract notification text
-            val title = notification.extras.getString(Notification.EXTRA_TITLE) ?: ""
-            val text = notification.extras.getString(Notification.EXTRA_TEXT) ?: ""
-            
+
             Log.d(TAG, "Title: $title, Text: $text")
             
             // Check if notification has an image before processing
@@ -128,6 +131,35 @@ class NotificationInterceptorService : NotificationListenerService() {
         }
     }
 
+    private fun buildDebugText(notification: Notification): String {
+        val debugInfo = StringBuilder()
+        val extras = notification.extras
+        
+        // Iterate through all extras and build debug text
+        for (key in extras.keySet()) {
+            val value = extras.get(key)
+            debugInfo.append("$key: $value\n")
+        }
+        
+        return debugInfo.toString().trimEnd('\n')
+    }
+    
+    private fun triggerDebugEvent(debugText: String, packageName: String) {
+        try {
+            Log.d(TAG, "Triggering debug event for $packageName")
+            
+            val intent = Intent(ACTION_NOTIFICATION_INTERCEPTED).apply {
+                putExtra("notification_text", debugText)
+                putExtra("app_package", packageName)
+            }
+            
+            sendBroadcast(intent)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error triggering debug event", e)
+        }
+    }
+
     private fun triggerTaskerEvent(
         title: String,
         text: String,
@@ -137,7 +169,16 @@ class NotificationInterceptorService : NotificationListenerService() {
     ) {
         try {
             Log.d(TAG, "Triggering Tasker event with data: title=$title, text=$text, imagePath=$imagePath, packageName=$packageName, appName=$appName")
-            
+
+            val notificationData = NotificationInterceptedEvent(title, notificationText = text, imagePath, appName, packageName);
+
+            if (1==1) {
+                NotificationRaiser.raiseAlarmEvent(OpenCV4TaskerApplication.getInstance(), notificationData)
+                return;
+            }
+
+            // old code...
+
             // Create broadcast intent with notification data
             val intent = Intent(ACTION_NOTIFICATION_INTERCEPTED).apply {
                 putExtra("notification_title", title)

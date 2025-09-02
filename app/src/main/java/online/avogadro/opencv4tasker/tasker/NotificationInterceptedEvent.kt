@@ -4,6 +4,7 @@ import android.content.Context
 import com.joaomgcd.taskerpluginlibrary.action.TaskerPluginRunnerAction
 import com.joaomgcd.taskerpluginlibrary.config.TaskerPluginConfig
 import com.joaomgcd.taskerpluginlibrary.config.TaskerPluginConfigHelper
+import com.joaomgcd.taskerpluginlibrary.extensions.requestQuery
 import com.joaomgcd.taskerpluginlibrary.input.TaskerInput
 import com.joaomgcd.taskerpluginlibrary.input.TaskerInputField
 import com.joaomgcd.taskerpluginlibrary.input.TaskerInputRoot
@@ -24,6 +25,7 @@ class NotificationInterceptedEventInput @JvmOverloads constructor(
 /**
  * Output data for the Notification Intercepted event
  */
+@TaskerInputRoot
 @TaskerOutputObject
 class NotificationInterceptedEvent(
     @get:TaskerOutputVariable("notification_title")
@@ -58,12 +60,12 @@ class NotificationInterceptedEventHelper(config: TaskerPluginConfig<Notification
     override fun addToStringBlurb(input: TaskerInput<NotificationInterceptedEventInput>, blurbBuilder: StringBuilder) {
         if (input.regular.enabled) {
             if (input.regular.appNameFilter.isNotEmpty()) {
-                blurbBuilder.append("monitoring notifications from apps containing '${input.regular.appNameFilter}'")
+                blurbBuilder.append(" monitoring notifications from apps containing '${input.regular.appNameFilter}'")
             } else {
-                blurbBuilder.append("monitoring notifications with images from all apps")
+                blurbBuilder.append(" monitoring notifications with images from all apps")
             }
         } else {
-            blurbBuilder.append("notification monitoring disabled")
+            blurbBuilder.append(" notification monitoring disabled")
         }
     }
 }
@@ -79,3 +81,5 @@ class NotificationInterceptedEventRunner : TaskerPluginRunnerAction<Notification
         return TaskerPluginResultSucess()
     }
 }
+
+fun Context.triggerTaskerEventNotificationIntercepted(bundle: Any?) = ActivityConfigNotificationInterceptedEvent::class.java.requestQuery(this, bundle)
