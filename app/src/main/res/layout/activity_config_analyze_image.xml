@@ -39,13 +39,13 @@
                 android:id="@+id/radioEngineClaudeAI"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Claude.AI" />
+                android:text="@string/engine_claude" />
 
             <RadioButton
                 android:id="@+id/radioEngineGemini"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Gemini" />
+                android:text="@string/engine_gemini" />
         </RadioGroup>
 
         <TextView
