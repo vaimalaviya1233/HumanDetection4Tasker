@@ -2,6 +2,8 @@ package online.avogadro.opencv4tasker.tasker
 
 import android.content.Context
 import com.joaomgcd.taskerpluginlibrary.action.TaskerPluginRunnerAction
+import com.joaomgcd.taskerpluginlibrary.condition.TaskerPluginRunnerCondition
+import com.joaomgcd.taskerpluginlibrary.condition.TaskerPluginRunnerConditionNoInput
 import com.joaomgcd.taskerpluginlibrary.config.TaskerPluginConfig
 import com.joaomgcd.taskerpluginlibrary.config.TaskerPluginConfigHelper
 import com.joaomgcd.taskerpluginlibrary.extensions.requestQuery
@@ -11,6 +13,8 @@ import com.joaomgcd.taskerpluginlibrary.input.TaskerInputRoot
 import com.joaomgcd.taskerpluginlibrary.output.TaskerOutputObject
 import com.joaomgcd.taskerpluginlibrary.output.TaskerOutputVariable
 import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResult
+import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultCondition
+import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultConditionSatisfied
 import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultSucess
 
 /**
@@ -48,10 +52,10 @@ class NotificationInterceptedEvent(
  * Tasker Plugin Event Helper for Notification Intercepted
  */
 class NotificationInterceptedEventHelper(config: TaskerPluginConfig<NotificationInterceptedEventInput>) : 
-    TaskerPluginConfigHelper<NotificationInterceptedEventInput, NotificationInterceptedEvent, NotificationInterceptedEventRunner>(config) {
+    TaskerPluginConfigHelper<NotificationInterceptedEventInput, NotificationInterceptedEvent, NotificationInterceptedRunnerConditionEvent>(config) {
     
-    override val runnerClass: Class<NotificationInterceptedEventRunner> 
-        get() = NotificationInterceptedEventRunner::class.java
+    override val runnerClass: Class<NotificationInterceptedRunnerConditionEvent>
+        get() = NotificationInterceptedRunnerConditionEvent::class.java
     
     override val inputClass = NotificationInterceptedEventInput::class.java
     
@@ -70,15 +74,23 @@ class NotificationInterceptedEventHelper(config: TaskerPluginConfig<Notification
     }
 }
 
-/**
- * Event Runner - dummy implementation since events are triggered externally
- */
-class NotificationInterceptedEventRunner : TaskerPluginRunnerAction<NotificationInterceptedEventInput, NotificationInterceptedEvent>() {
-    
-    override fun run(context: Context, input: TaskerInput<NotificationInterceptedEventInput>): TaskerPluginResult<NotificationInterceptedEvent> {
-        // This is just a placeholder - the actual event triggering is handled by the NotificationInterceptorService
-        // Return success to indicate the event configuration is valid
-        return TaskerPluginResultSucess()
+///**
+// * Event Runner - dummy implementation since events are triggered externally
+// */
+//class NotificationInterceptedEventRunner : TaskerPluginRunnerAction<NotificationInterceptedEventInput, NotificationInterceptedEvent>() {
+//
+//    override fun run(context: Context, input: TaskerInput<NotificationInterceptedEventInput>): TaskerPluginResult<NotificationInterceptedEvent> {
+//        // This is just a placeholder - the actual event triggering is handled by the NotificationInterceptorService
+//        // Return success to indicate the event configuration is valid
+//        return TaskerPluginResultSucess()
+//    }
+//}
+
+class NotificationInterceptedRunnerConditionEvent() : TaskerPluginRunnerCondition<NotificationInterceptedEventInput, NotificationInterceptedEvent, NotificationInterceptedEvent>() {
+    override val isEvent: Boolean get() = true
+
+    override fun getSatisfiedCondition(context: Context, input: TaskerInput<NotificationInterceptedEventInput>, update: NotificationInterceptedEvent?): TaskerPluginResultCondition<NotificationInterceptedEvent> {
+        return TaskerPluginResultConditionSatisfied(context, update)
     }
 }
 
