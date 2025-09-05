@@ -143,34 +143,18 @@ class NotificationInterceptorService : NotificationListenerService() {
         
         return debugInfo.toString().trimEnd('\n')
     }
-    
-    private fun triggerDebugEvent(debugText: String, packageName: String) {
-        try {
-            Log.d(TAG, "Triggering debug event for $packageName")
-            
-            val intent = Intent(ACTION_NOTIFICATION_INTERCEPTED).apply {
-                putExtra("notification_text", debugText)
-                putExtra("app_package", packageName)
-            }
-            
-            sendBroadcast(intent)
-            
-        } catch (e: Exception) {
-            Log.e(TAG, "Error triggering debug event", e)
-        }
-    }
 
     private fun triggerTaskerEvent(
         title: String,
-        text: String,
+        notificationText: String,
         imagePath: String,
         packageName: String,
         appName: String
     ) {
         try {
-            Log.d(TAG, "Triggering Tasker event with data: title=$title, text=$text, imagePath=$imagePath, packageName=$packageName, appName=$appName")
+            Log.d(TAG, "Triggering Tasker event with data: title=$title, text=$notificationText, imagePath=$imagePath, packageName=$packageName, appName=$appName")
 
-            val notificationData = NotificationInterceptedEvent(title, notificationText = text, imagePath, appName, packageName);
+            val notificationData = NotificationInterceptedEvent(title, notificationText, imagePath, appName, packageName);
 
             if (1==1) {
                 NotificationRaiser.raiseAlarmEvent(OpenCV4TaskerApplication.getInstance(), notificationData)
@@ -182,7 +166,7 @@ class NotificationInterceptorService : NotificationListenerService() {
             // Create broadcast intent with notification data
             val intent = Intent(ACTION_NOTIFICATION_INTERCEPTED).apply {
                 putExtra("notification_title", title)
-                putExtra("notification_text", text)
+                putExtra("notification_text", notificationText)
                 putExtra("image_path", imagePath)
                 putExtra("app_package", packageName)
                 putExtra("app_name", appName)
