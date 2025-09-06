@@ -18,21 +18,23 @@ V 1.0.2
 * added file picker 
 
 Features:
+* Provides a tasker Event that will trigger when an app (configurable) creates a notification with an image: useful to start a person detection macro that will add advanced AI-features to non-AI enabled cameras
 * Provides a tasker action capable to open an image and return a score 0-100 in term of how likely the image contains a person
-* Provides a tasker action that you can use to ask generic questions to Claude/Gemini regarding an image/text
+* Provides a tasker action that you can use to ask generic questions to Claude/Gemini regarding an image/text (e.g. "is the garage door closed?" or "is there a dog in the image?")
 * simple home screen to test it against local images
 * can parse file names in the form of content://media/external/images/something or in form file:///sdcard/somewhere/file.jpg
-* can parse PNG and JPG (tensorflow) or JPG (Claude)
+* can parse PNG and JPG (tensorflow) or JPG (Anthropic Claude and Google Gemini)
 
 Limitations:
-* uses old APIs so no Play store version
-* sometime later I will provide pre-build APK for ease of use
+* uses old APIs so no Play store version: you can download pre-built APK from github
 * permission and battery management is still rudimentary
 
 Ideas for future improvements:
-* Support for PNG with Claude 
+* Support for PNG with Claude/Gemini
+* Support for Openrouter.ai
+* support for running locally Google Gemma 3n
 * Support for ChatGPT-Vision
-* Support for generic Claude/ChatGPT actions
+* [DONE] ~~Support for generic Claude/ChatGPT actions~~
 
 IMPORTANT Caveats:
 * will use more battery than you want, until I understand why, the default plugin mechanism is not working as expected (problems with Foreground service)
@@ -40,6 +42,7 @@ IMPORTANT Caveats:
 HOW-TO use it:
 * install the APK (you can download it from the GitHub releases) 
 * start it: so that it's registered and available to Tasker/Macrodroid
+* (optional): go to settings and add you Claude/Gemini API Key (if you want to be able to use these online models), see <How to create API keys for Google and Claude.md>
 * within Macrodroid/Tasker
     * go to the task you want to use
     * add action > external app > HumanDetection4Tasker > Human Recognition
