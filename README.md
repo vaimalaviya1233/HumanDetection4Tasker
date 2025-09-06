@@ -2,6 +2,9 @@ Plugin app for Tasker and MacroDroid to provide Humans Detection
 
 Licensed under GPL v3
 
+V 1.4.0:
+* FEATURE: Generate a Tasker Event when a notification with images is generated
+
 V 1.3.0
 * ADDED: new event allowing to perform a general purpose image analysis using Gemini or Claude
 
