@@ -77,6 +77,15 @@ public class MainActivity extends AppCompatActivity {
         } else {
             warningTextView.setVisibility(View.GONE);
         }
+        
+        // Set click listener for warning message to open instructions URL
+        warningTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://bit.ly/464a1Dm"));
+                startActivity(browserIntent);
+            }
+        });
     }
 
     @Override
@@ -109,6 +118,15 @@ public class MainActivity extends AppCompatActivity {
         } else {
             warningTextView.setVisibility(View.GONE);
         }
+        
+        // Set click listener for warning message to open instructions URL
+        warningTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://bit.ly/464a1Dm"));
+                startActivity(browserIntent);
+            }
+        });
 
         findViewById(R.id.buttonTest).setOnClickListener(new View.OnClickListener() {
             @Override

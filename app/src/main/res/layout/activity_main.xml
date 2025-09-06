@@ -75,9 +75,11 @@
         android:layout_height="wrap_content"
         android:background="#FFF3CD"
         android:padding="8dp"
-        android:text="Google/Claude keys are not set: add your keys if you want to use these online models"
+        android:text="Google/Claude keys are not set: add your keys if you want to use these online models.\nSee instructions here on how to generate the keys"
         android:textColor="#856404"
         android:textSize="12sp"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true" />
 
 </LinearLayout>
