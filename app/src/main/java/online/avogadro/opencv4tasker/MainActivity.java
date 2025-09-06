@@ -62,17 +62,21 @@ public class MainActivity extends AppCompatActivity {
 
         // Check Claude API key and enable/disable Claude option
         RadioButton claudeButton = findViewById(R.id.radioEngineClaudeAI);
-        if ("".equals(SharedPreferencesHelper.get(this, SharedPreferencesHelper.CLAUDE_API_KEY)))
-            claudeButton.setEnabled(false);
-        else
-            claudeButton.setEnabled(true);
+        boolean hasClaudeKey = !"".equals(SharedPreferencesHelper.get(this, SharedPreferencesHelper.CLAUDE_API_KEY));
+        claudeButton.setEnabled(hasClaudeKey);
         
         // Check Gemini API key and enable/disable Gemini option
         RadioButton geminiButton = findViewById(R.id.radioEngineGemini);
-        if ("".equals(SharedPreferencesHelper.get(this, SharedPreferencesHelper.GEMINI_API_KEY)))
-            geminiButton.setEnabled(false);
-        else
-            geminiButton.setEnabled(true);
+        boolean hasGeminiKey = !"".equals(SharedPreferencesHelper.get(this, SharedPreferencesHelper.GEMINI_API_KEY));
+        geminiButton.setEnabled(hasGeminiKey);
+        
+        // Show/hide warning message if API keys are missing
+        TextView warningTextView = findViewById(R.id.warningTextView);
+        if (!hasClaudeKey || !hasGeminiKey) {
+            warningTextView.setVisibility(View.VISIBLE);
+        } else {
+            warningTextView.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -90,17 +94,21 @@ public class MainActivity extends AppCompatActivity {
 
         // Check Claude API key and enable/disable Claude option
         RadioButton claudeButton = findViewById(R.id.radioEngineClaudeAI);
-        if ("".equals(SharedPreferencesHelper.get(this, SharedPreferencesHelper.CLAUDE_API_KEY)))
-            claudeButton.setEnabled(false);
-        else
-            claudeButton.setEnabled(true);
+        boolean hasClaudeKey = !"".equals(SharedPreferencesHelper.get(this, SharedPreferencesHelper.CLAUDE_API_KEY));
+        claudeButton.setEnabled(hasClaudeKey);
             
         // Check Gemini API key and enable/disable Gemini option
         RadioButton geminiButton = findViewById(R.id.radioEngineGemini);
-        if ("".equals(SharedPreferencesHelper.get(this, SharedPreferencesHelper.GEMINI_API_KEY)))
-            geminiButton.setEnabled(false);
-        else
-            geminiButton.setEnabled(true);
+        boolean hasGeminiKey = !"".equals(SharedPreferencesHelper.get(this, SharedPreferencesHelper.GEMINI_API_KEY));
+        geminiButton.setEnabled(hasGeminiKey);
+        
+        // Show/hide warning message if API keys are missing
+        TextView warningTextView = findViewById(R.id.warningTextView);
+        if (!hasClaudeKey || !hasGeminiKey) {
+            warningTextView.setVisibility(View.VISIBLE);
+        } else {
+            warningTextView.setVisibility(View.GONE);
+        }
 
         findViewById(R.id.buttonTest).setOnClickListener(new View.OnClickListener() {
             @Override

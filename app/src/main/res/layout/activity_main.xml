@@ -64,9 +64,20 @@
     <TextView
         android:id="@+id/resultTextView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:ems="10"
         android:gravity="start|top" />
 
+    <TextView
+        android:id="@+id/warningTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFF3CD"
+        android:padding="8dp"
+        android:text="Google/Claude keys are not set: add your keys if you want to use these online models"
+        android:textColor="#856404"
+        android:textSize="12sp"
+        android:visibility="gone" />
 
 </LinearLayout>
