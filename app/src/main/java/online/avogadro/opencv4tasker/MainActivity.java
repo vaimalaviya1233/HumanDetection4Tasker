@@ -16,6 +16,8 @@ import android.provider.DocumentsContract;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.RadioButton;
@@ -143,13 +145,6 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(intent, PICK_IMAGE);
             }
         });
-        findViewById(R.id.buttonSetup).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, ConfigActivity.class);
-                startActivity(intent);
-            }
-        });
     }
 
     private void processImage(String imageUri) {
@@ -258,6 +253,22 @@ public class MainActivity extends AppCompatActivity {
 //                result.append("Size: ").append(rects[i].width).append("x").append(rects[i].height).append("\n\n");
 //            }
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_settings) {
+            Intent intent = new Intent(MainActivity.this, ConfigActivity.class);
+            startActivity(intent);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 }
