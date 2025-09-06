@@ -13,7 +13,7 @@ import online.avogadro.opencv4tasker.tasker.NotificationRaiser
 
 class NotificationInterceptorService : NotificationListenerService() {
 
-    private val DEBUG=true;
+    private val DEBUG=false;
 
     companion object {
         private const val TAG = "NotificationInterceptor"
@@ -74,11 +74,12 @@ class NotificationInterceptorService : NotificationListenerService() {
             
             if (appNameFilter.isNotEmpty()) {
                 val matchesFilter = appName.contains(appNameFilter, ignoreCase = true)
-                if (!matchesFilter) {
-                    Log.d(TAG, "App name '$appName' does not contain filter '$appNameFilter', ignoring")
+                val matchesFilterPackage = packageName.contains(appNameFilter, ignoreCase = true)
+                if (!matchesFilter && !matchesFilterPackage) {
+                    Log.d(TAG, "App name '$appName' and package name '$packageName' do not contain filter '$appNameFilter', ignoring")
                     return
                 }
-                Log.d(TAG, "App name '$appName' matches filter '$appNameFilter'")
+                Log.d(TAG, "App name '$appName' or package name '$packageName' matches filter '$appNameFilter'")
             }
             
 
@@ -154,7 +155,13 @@ class NotificationInterceptorService : NotificationListenerService() {
         try {
             Log.d(TAG, "Triggering Tasker event with data: title=$title, text=$notificationText, imagePath=$imagePath, packageName=$packageName, appName=$appName")
 
-            val notificationData = NotificationInterceptedEvent(title, notificationText, imagePath, appName, packageName);
+            val notificationData = NotificationInterceptedEvent(title, notificationText, imagePath, appName, packageName)
+
+            notificationData.notificationTitle = title
+            notificationData.notificationText = notificationText
+            notificationData.appPackage = packageName
+            notificationData.appName = appName
+            notificationData.imagePath = imagePath
 
             if (1==1) {
                 NotificationRaiser.raiseAlarmEvent(OpenCV4TaskerApplication.getInstance(), notificationData)

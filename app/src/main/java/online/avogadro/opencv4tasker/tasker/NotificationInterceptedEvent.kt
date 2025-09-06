@@ -33,19 +33,24 @@ class NotificationInterceptedEventInput @JvmOverloads constructor(
 @TaskerOutputObject
 class NotificationInterceptedEvent(
     @get:TaskerOutputVariable("notification_title")
-    val notificationTitle: String = "",
+    @TaskerInputField(key="notification_title")
+    var notificationTitle: String = "",
     
     @get:TaskerOutputVariable("notification_text")
-    val notificationText: String = "",
+    @TaskerInputField(key="notification_text")
+    var notificationText: String = "",
     
     @get:TaskerOutputVariable("image_path")
-    val imagePath: String = "",
+    @TaskerInputField(key="image_path")
+    var imagePath: String = "",
     
     @get:TaskerOutputVariable("app_package")
-    val appPackage: String = "",
+    @TaskerInputField(key="app_package")
+    var appPackage: String = "",
     
     @get:TaskerOutputVariable("app_name")
-    val appName: String = ""
+    @TaskerInputField(key="app_name")
+    var appName: String = ""
 )
 
 /**
