@@ -47,9 +47,9 @@ Limitations:
 
 Ideas for future improvements:
 * Support for PNG with Claude/Gemini
-* Support for Openrouter.ai
+* [DONE] ~~Support for Openrouter.ai~~
 * support for running locally Google Gemma 3n
-* Support for ChatGPT-Vision
+* [DISCARDED] ~~Support for ChatGPT-Vision~~ (superseeded by OpenRouter allowing the use of ChatGPT Vision!)
 * [DONE] ~~Support for generic Claude/ChatGPT actions~~
 
 IMPORTANT Caveats:
