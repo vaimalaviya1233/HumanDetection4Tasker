@@ -2,6 +2,13 @@ Plugin app for Tasker and MacroDroid to provide Humans Detection
 
 Licensed under GPL v3
 
+V 1.5.0:
+* ADDED: support OpenRouter.AI for cloud queries: allowing completely free online image detection!
+        This is a very powerful addition since it allows to:
+        - use free models
+        - use almost any model which is vision-capable (future proof)
+        - get hight uptime (Openrouter will use fallback logic on different providers for some models)
+
 V 1.4.0:
 * FEATURE: Generate a Tasker Event when a notification with images is generated
 
@@ -26,7 +33,13 @@ Features:
 * Provides a tasker action that you can use to ask generic questions to Claude/Gemini regarding an image/text (e.g. "is the garage door closed?" or "is there a dog in the image?")
 * simple home screen to test it against local images
 * can parse file names in the form of content://media/external/images/something or in form file:///sdcard/somewhere/file.jpg
-* can parse PNG and JPG (tensorflow) or JPG (Anthropic Claude and Google Gemini)
+* can parse PNG and JPG (tensorflow) or JPG (Anthropic Claude, Google Gemini and OpenRouter)
+
+Supported person detection/image analysis engines:
+* TensorFlow: locally to the phone, limited accurancy ut very privacy-savy
+* Claude Sonnet 3.5 (online): will send the data to Anthropic's cloud LLM, which can perform many complex tasks. Very accurate
+* Gemini Flash 2.0 (online): will send the data to Google's cloud LLM, which can perform many complex tasks. Accurate and cheap
+* OpenRouter (online): will send the data to OpenRouter's cloud, which in turn will forward to the LLM you have selected. This qay you can shoose the cost (from free to very expensive) and accurateness of the model
 
 Limitations:
 * uses old APIs so no Play store version: you can download pre-built APK from github
@@ -45,7 +58,7 @@ IMPORTANT Caveats:
 HOW-TO use it:
 * install the APK (you can download it from the GitHub releases) 
 * start it: so that it's registered and available to Tasker/Macrodroid
-* (optional): go to settings and add you Claude/Gemini API Key (if you want to be able to use these online models), see <How to create API keys for Google and Claude.md>
+* (optional): go to settings and add you Claude/Gemini/OpenRouter API Key (if you want to be able to use these online models), see <How to create API keys for Google and Claude.md>
 * within Macrodroid/Tasker
     * go to the task you want to use
     * add action > external app > HumanDetection4Tasker > Human Recognition

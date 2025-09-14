@@ -23,6 +23,8 @@ public class ConfigActivity extends AppCompatActivity {
 
     EditText claudeApiKey;
     EditText geminiApiKey;
+    EditText openRouterApiKey;
+    EditText openRouterModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +48,20 @@ public class ConfigActivity extends AppCompatActivity {
         String geminiVal = SharedPreferencesHelper.get(this, SharedPreferencesHelper.GEMINI_API_KEY);
         if (geminiVal != null)
             geminiApiKey.setText(geminiVal);
+            
+        // Configure OpenRouter API key
+        openRouterApiKey = findViewById(R.id.openRouterApiKey);
+        String openRouterKeyVal = SharedPreferencesHelper.get(this, SharedPreferencesHelper.OPENROUTER_API_KEY);
+        if (openRouterKeyVal != null)
+            openRouterApiKey.setText(openRouterKeyVal);
+            
+        // Configure OpenRouter Model
+        openRouterModel = findViewById(R.id.openRouterModel);
+        String openRouterModelVal = SharedPreferencesHelper.get(this, SharedPreferencesHelper.OPENROUTER_MODEL);
+        if (openRouterModelVal != null && !openRouterModelVal.isEmpty())
+            openRouterModel.setText(openRouterModelVal);
+        else
+            openRouterModel.setText("qwen/qwen2.5-vl-32b-instruct:free");
 
         findViewById(R.id.buttonSave).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -61,6 +77,18 @@ public class ConfigActivity extends AppCompatActivity {
                         ConfigActivity.this,
                         SharedPreferencesHelper.GEMINI_API_KEY,
                         geminiApiKey.getText().toString());
+                        
+                // Save OpenRouter API key
+                SharedPreferencesHelper.save(
+                        ConfigActivity.this,
+                        SharedPreferencesHelper.OPENROUTER_API_KEY,
+                        openRouterApiKey.getText().toString());
+                        
+                // Save OpenRouter Model
+                SharedPreferencesHelper.save(
+                        ConfigActivity.this,
+                        SharedPreferencesHelper.OPENROUTER_MODEL,
+                        openRouterModel.getText().toString());
                         
                 finish(); // return to main activity
             }

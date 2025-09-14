@@ -10,6 +10,8 @@ public class SharedPreferencesHelper {
     private static final String PREFS_NAME = "MyAppPreferences";
     public static final String CLAUDE_API_KEY = "CLAUDE_API_KEY";
     public static final String GEMINI_API_KEY = "GEMINI_API_KEY";
+    public static final String OPENROUTER_API_KEY = "OPENROUTER_API_KEY";
+    public static final String OPENROUTER_MODEL = "OPENROUTER_MODEL";
     public static final String LAST_IMAGE_PATH = "LAST_IMAGE_PATH";
     public static final String NOTIFICATION_EVENT_ENABLED = "NOTIFICATION_EVENT_ENABLED";
     public static final String NOTIFICATION_EVENT_APP_FILTER = "NOTIFICATION_EVENT_APP_FILTER";

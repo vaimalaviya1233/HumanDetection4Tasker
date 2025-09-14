@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import online.avogadro.opencv4tasker.app.SharedPreferencesHelper;
 import online.avogadro.opencv4tasker.claudeai.HumansDetectorClaudeAI;
 import online.avogadro.opencv4tasker.gemini.HumansDetectorGemini;
+import online.avogadro.opencv4tasker.openrouter.HumansDetectorOpenRouter;
 import online.avogadro.opencv4tasker.tensorflowlite.HumansDetectorTensorFlow;
 
 import android.content.Intent;
@@ -35,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     static final String ENGINE_CLAUDE_AI = "CLAUDE";
     static final String ENGINE_TENSORFLOW = "TENSORFLOW";
     static final String ENGINE_GEMINI = "GEMINI";
+    static final String ENGINE_OPENROUTER = "OPENROUTER";
 
     EditText testImagePath;
 
@@ -70,9 +72,14 @@ public class MainActivity extends AppCompatActivity {
         boolean hasGeminiKey = !"".equals(SharedPreferencesHelper.get(this, SharedPreferencesHelper.GEMINI_API_KEY));
         geminiButton.setEnabled(hasGeminiKey);
         
+        // Check OpenRouter API key and enable/disable OpenRouter option
+        RadioButton openRouterButton = findViewById(R.id.radioEngineOpenRouter);
+        boolean hasOpenRouterKey = !"".equals(SharedPreferencesHelper.get(this, SharedPreferencesHelper.OPENROUTER_API_KEY));
+        openRouterButton.setEnabled(hasOpenRouterKey);
+        
         // Show/hide warning message if API keys are missing
         TextView warningTextView = findViewById(R.id.warningTextView);
-        if (!hasClaudeKey || !hasGeminiKey) {
+        if (!hasClaudeKey || !hasGeminiKey || !hasOpenRouterKey) {
             warningTextView.setVisibility(View.VISIBLE);
         } else {
             warningTextView.setVisibility(View.GONE);
@@ -111,9 +118,14 @@ public class MainActivity extends AppCompatActivity {
         boolean hasGeminiKey = !"".equals(SharedPreferencesHelper.get(this, SharedPreferencesHelper.GEMINI_API_KEY));
         geminiButton.setEnabled(hasGeminiKey);
         
+        // Check OpenRouter API key and enable/disable OpenRouter option
+        RadioButton openRouterButton = findViewById(R.id.radioEngineOpenRouter);
+        boolean hasOpenRouterKey = !"".equals(SharedPreferencesHelper.get(this, SharedPreferencesHelper.OPENROUTER_API_KEY));
+        openRouterButton.setEnabled(hasOpenRouterKey);
+        
         // Show/hide warning message if API keys are missing
         TextView warningTextView = findViewById(R.id.warningTextView);
-        if (!hasClaudeKey || !hasGeminiKey) {
+        if (!hasClaudeKey || !hasGeminiKey || !hasOpenRouterKey) {
             warningTextView.setVisibility(View.VISIBLE);
         } else {
             warningTextView.setVisibility(View.GONE);
@@ -182,12 +194,15 @@ public class MainActivity extends AppCompatActivity {
         RadioButton radioTensorflow = (RadioButton)findViewById(R.id.radioEngineTensorflowLite);
         RadioButton radioGemini = (RadioButton)findViewById(R.id.radioEngineGemini);
         RadioButton radioClaude = (RadioButton)findViewById(R.id.radioEngineClaudeAI);
+        RadioButton radioOpenRouter = (RadioButton)findViewById(R.id.radioEngineOpenRouter);
 
         int detectionScore = -99;
         if (radioTensorflow.isChecked()) {
             engine = ENGINE_TENSORFLOW;
         } else if (radioGemini.isChecked()) {
             engine = ENGINE_GEMINI;
+        } else if (radioOpenRouter.isChecked()) {
+            engine = ENGINE_OPENROUTER;
         } else {
             engine = ENGINE_CLAUDE_AI;
         }
@@ -232,6 +247,29 @@ public class MainActivity extends AppCompatActivity {
                             // UI Thread work here
                             if (result!=-1)
                                 resultTextView.setText("Detection score: "+result+" "+ENGINE_GEMINI+"\n"+h.getLastResponse());
+                            else
+                                resultTextView.setText("Detection failure: "+h.getLastError());
+                        });
+                    } catch (IOException e) {
+                        handler.post(() -> {
+                            resultTextView.setText("Detection error: " + e.getMessage());
+                        });
+                    }
+                });
+            } else if (engine==ENGINE_OPENROUTER) {
+                ExecutorService executor = Executors.newSingleThreadExecutor();
+                Handler handler = new Handler(Looper.getMainLooper());
+                executor.execute(() -> {
+                    try {
+                        // Background work here
+                        HumansDetectorOpenRouter h = new HumansDetectorOpenRouter();
+                        h.setup(this);
+                        int result = h.detectPerson(this, imageUri);
+
+                        handler.post(() -> {
+                            // UI Thread work here
+                            if (result!=-1)
+                                resultTextView.setText("Detection score: "+result+" "+ENGINE_OPENROUTER+"\n"+h.getLastResponse());
                             else
                                 resultTextView.setText("Detection failure: "+h.getLastError());
                         });

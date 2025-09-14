@@ -48,6 +48,12 @@
             android:text="@string/engine_gemini" />
 
         <RadioButton
+            android:id="@+id/radioEngineOpenRouter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/engine_openrouter" />
+
+        <RadioButton
             android:id="@+id/radioEngineTensorflowLite"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -75,7 +81,7 @@
         android:layout_height="wrap_content"
         android:background="#FFF3CD"
         android:padding="8dp"
-        android:text="Google/Claude keys are not set: add your keys if you want to use these online models.\nSee instructions here on how to generate the keys"
+        android:text="Google/Claude/OpenRouter keys are not set: add your keys if you want to use these online models.\nSee instructions here on how to generate the keys"
         android:textColor="#856404"
         android:textSize="12sp"
         android:visibility="gone"

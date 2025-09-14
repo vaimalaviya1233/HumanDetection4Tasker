@@ -19,5 +19,6 @@
     <!-- AI Engine Labels -->
     <string name="engine_claude">Claude Sonnet 3.5 (online)</string>
     <string name="engine_gemini">Gemini 2.0 Flash (online)</string>
+    <string name="engine_openrouter">OpenRouter (online)</string>
     <string name="engine_tensorflow">Tensorflow Lite (local device)</string>
 </resources>

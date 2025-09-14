@@ -8,3 +8,8 @@ How to get an Anthropic Claude API key:
 * go to https://console.anthropic.com/settings/keys
 * register/login if needed
 * press the "+ Create Key" button in the top right corner of the page
+
+How to get an openRouter API key:
+* go to https://openrouter.ai/settings/keys
+* register/login if needed
+* press the blue "Create API Key" button in the top right corner of the page
