@@ -20,14 +20,6 @@
         android:text="This event will trigger when notifications with images are received from matching apps."
         android:layout_marginBottom="16dp" />
 
-    <CheckBox
-        android:id="@+id/checkboxEnabled"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Enable notification monitoring"
-        android:checked="true"
-        android:layout_marginBottom="16dp" />
-
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

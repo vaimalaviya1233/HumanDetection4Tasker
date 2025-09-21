@@ -23,14 +23,12 @@ class ActivityConfigNotificationInterceptedEvent : Activity(), TaskerPluginConfi
     private lateinit var binding: ActivityConfigNotificationInterceptedEventBinding
 
     override fun assignFromInput(input: TaskerInput<NotificationInterceptedEventInput>) {
-        // Set the checkbox and text field state based on the input
-        binding.checkboxEnabled.isChecked = input.regular.enabled
+        // Set the text field state based on the input
         binding.editTextAppFilter.setText(input.regular.appNameFilter)
     }
 
-    override val inputForTasker: TaskerInput<NotificationInterceptedEventInput> 
+    override val inputForTasker: TaskerInput<NotificationInterceptedEventInput>
         get() = TaskerInput(NotificationInterceptedEventInput(
-            enabled = binding.checkboxEnabled.isChecked,
             appNameFilter = binding.editTextAppFilter.text.toString().trim()
         ))
 
@@ -44,17 +42,12 @@ class ActivityConfigNotificationInterceptedEvent : Activity(), TaskerPluginConfi
         setContentView(binding.root)
 
         binding.buttonOK.setOnClickListener {
-            if (binding.checkboxEnabled.isChecked) {
-                // Check if notification listener permission is granted
-                if (!isNotificationListenerEnabled()) {
-                    // Show dialog to grant permission
-                    showNotificationAccessDialog()
-                } else {
-                    // Permission is granted, proceed
-                    finishConfiguration()
-                }
+            // Check if notification listener permission is granted
+            if (!isNotificationListenerEnabled()) {
+                // Show dialog to grant permission
+                showNotificationAccessDialog()
             } else {
-                // Event is disabled, no permission needed
+                // Permission is granted, proceed
                 finishConfiguration()
             }
         }
@@ -134,17 +127,8 @@ class ActivityConfigNotificationInterceptedEvent : Activity(), TaskerPluginConfi
     }
 
     private fun finishConfiguration() {
-        Log.d(TAG, "Finishing configuration with enabled = ${binding.checkboxEnabled.isChecked}")
-        
-        // Save configuration to SharedPreferences so the service can access it
-        SharedPreferencesHelper.saveBoolean(
-            this, 
-            SharedPreferencesHelper.NOTIFICATION_EVENT_ENABLED, 
-            binding.checkboxEnabled.isChecked
-        )
-        
-        Log.d(TAG, "Configuration saved: enabled=${binding.checkboxEnabled.isChecked}, filter='${binding.editTextAppFilter.text.toString().trim()}'")
-        
+        Log.d(TAG, "Finishing configuration with filter='${binding.editTextAppFilter.text.toString().trim()}'")
+
         taskerHelper.finishForTasker()
     }
 }

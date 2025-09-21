@@ -23,7 +23,6 @@ import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultSucess
  */
 @TaskerInputRoot
 class NotificationInterceptedEventInput @JvmOverloads constructor(
-    @field:TaskerInputField("enabled") var enabled: Boolean = true,
     @field:TaskerInputField("appNameFilter") var appNameFilter: String = ""
 )
 
@@ -68,14 +67,10 @@ class NotificationInterceptedEventHelper(config: TaskerPluginConfig<Notification
     override val outputClass = NotificationInterceptedEvent::class.java
     
     override fun addToStringBlurb(input: TaskerInput<NotificationInterceptedEventInput>, blurbBuilder: StringBuilder) {
-        if (input.regular.enabled) {
-            if (input.regular.appNameFilter.isNotEmpty()) {
-                blurbBuilder.append(" monitoring notifications from apps containing '${input.regular.appNameFilter}'")
-            } else {
-                blurbBuilder.append(" monitoring notifications with images from all apps")
-            }
+        if (input.regular.appNameFilter.isNotEmpty()) {
+            blurbBuilder.append(" monitoring notifications from apps containing '${input.regular.appNameFilter}'")
         } else {
-            blurbBuilder.append(" notification monitoring disabled")
+            blurbBuilder.append(" monitoring notifications with images from all apps")
         }
     }
 }
