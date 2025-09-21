@@ -66,23 +66,6 @@ class NotificationInterceptorService : NotificationListenerService() {
                 return;
             }
 
-            // Check app name filter
-            val appNameFilter = SharedPreferencesHelper.get(
-                this, 
-                SharedPreferencesHelper.NOTIFICATION_EVENT_APP_FILTER
-            )
-            
-            if (appNameFilter.isNotEmpty()) {
-                val matchesFilter = appName.contains(appNameFilter, ignoreCase = true)
-                val matchesFilterPackage = packageName.contains(appNameFilter, ignoreCase = true)
-                if (!matchesFilter && !matchesFilterPackage) {
-                    Log.d(TAG, "App name '$appName' and package name '$packageName' do not contain filter '$appNameFilter', ignoring")
-                    return
-                }
-                Log.d(TAG, "App name '$appName' or package name '$packageName' matches filter '$appNameFilter'")
-            }
-            
-
             Log.d(TAG, "Title: $title, Text: $text")
             
             // Check if notification has an image before processing

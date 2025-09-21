@@ -15,6 +15,7 @@ import com.joaomgcd.taskerpluginlibrary.output.TaskerOutputVariable
 import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResult
 import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultCondition
 import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultConditionSatisfied
+import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultConditionUnsatisfied
 import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultSucess
 
 /**
@@ -95,6 +96,20 @@ class NotificationInterceptedRunnerConditionEvent() : TaskerPluginRunnerConditio
     override val isEvent: Boolean get() = true
 
     override fun getSatisfiedCondition(context: Context, input: TaskerInput<NotificationInterceptedEventInput>, update: NotificationInterceptedEvent?): TaskerPluginResultCondition<NotificationInterceptedEvent> {
+        if (update == null) {
+            return TaskerPluginResultConditionUnsatisfied()
+        }
+
+        val appNameFilter = input.regular.appNameFilter
+        if (appNameFilter.isNotEmpty()) {
+            val matchesAppName = update.appName.contains(appNameFilter, ignoreCase = true)
+            val matchesPackage = update.appPackage.contains(appNameFilter, ignoreCase = true)
+
+            if (!matchesAppName && !matchesPackage) {
+                return TaskerPluginResultConditionUnsatisfied()
+            }
+        }
+
         return TaskerPluginResultConditionSatisfied(context, update)
     }
 }

@@ -7,7 +7,8 @@ V 1.5.0:
         This is a very powerful addition since it allows to:
         - use free models
         - use almost any model which is vision-capable (future proof)
-        - get hight uptime (Openrouter will use fallback logic on different providers for some models)
+        - get higher uptime (Openrouter will use fallback logic on different providers for some models)
+* FIXED: issue where NotificationInterceptor will only apply appName filter for the last edited filter!
 
 V 1.4.0:
 * FEATURE: Generate a Tasker Event when a notification with images is generated

@@ -142,11 +142,6 @@ class ActivityConfigNotificationInterceptedEvent : Activity(), TaskerPluginConfi
             SharedPreferencesHelper.NOTIFICATION_EVENT_ENABLED, 
             binding.checkboxEnabled.isChecked
         )
-        SharedPreferencesHelper.save(
-            this, 
-            SharedPreferencesHelper.NOTIFICATION_EVENT_APP_FILTER, 
-            binding.editTextAppFilter.text.toString().trim()
-        )
         
         Log.d(TAG, "Configuration saved: enabled=${binding.checkboxEnabled.isChecked}, filter='${binding.editTextAppFilter.text.toString().trim()}'")
         

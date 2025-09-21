@@ -14,7 +14,6 @@ public class SharedPreferencesHelper {
     public static final String OPENROUTER_MODEL = "OPENROUTER_MODEL";
     public static final String LAST_IMAGE_PATH = "LAST_IMAGE_PATH";
     public static final String NOTIFICATION_EVENT_ENABLED = "NOTIFICATION_EVENT_ENABLED";
-    public static final String NOTIFICATION_EVENT_APP_FILTER = "NOTIFICATION_EVENT_APP_FILTER";
     private static final String PASSWORD = "u2fg393ujk.%!kspa5fg393ujk.%!kra"; // Not recommended
 
     public static void save(Context context, String key, String value) {
