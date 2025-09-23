@@ -2,6 +2,9 @@ Plugin app for Tasker and MacroDroid to provide Humans Detection
 
 Licensed under GPL v3
 
+V 1.6.0:
+* CHANGED: updated to using Claude Sonnet 4.0 since 3.5 is being retired
+
 V 1.5.0:
 * ADDED: support OpenRouter.AI for cloud queries: allowing completely free online image detection!
         This is a very powerful addition since it allows to:
@@ -38,7 +41,7 @@ Features:
 
 Supported person detection/image analysis engines:
 * TensorFlow: locally to the phone, limited accurancy ut very privacy-savy
-* Claude Sonnet 3.5 (online): will send the data to Anthropic's cloud LLM, which can perform many complex tasks. Very accurate
+* Claude Sonnet 4.0 (online): will send the data to Anthropic's cloud LLM, which can perform many complex tasks. Very accurate
 * Gemini Flash 2.0 (online): will send the data to Google's cloud LLM, which can perform many complex tasks. Accurate and cheap
 * OpenRouter (online): will send the data to OpenRouter's cloud, which in turn will forward to the LLM you have selected. This qay you can shoose the cost (from free to very expensive) and accurateness of the model
 

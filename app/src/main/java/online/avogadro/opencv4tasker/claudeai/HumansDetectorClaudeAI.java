@@ -37,7 +37,7 @@ public class HumansDetectorClaudeAI implements AIImageAnalyzer {
             "Ignore any shadows";
 
     static final String TAG = "HumansDetectorClaudeAI";
-    public static final String CLAUDE_MODEL = "claude-3-5-sonnet-latest";
+    public static final String CLAUDE_MODEL = "claude-sonnet-4-20250514"; // was: ""claude-3-5-sonnet-latest";
 
     private static final String CONTENT_TYPE_JPG="image/jpeg";
     private static final String CONTENT_TYPE_PNG="image/png";
