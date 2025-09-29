@@ -24,7 +24,9 @@ import online.avogadro.opencv4tasker.app.Util;
 public class HumansDetectorGemini implements AIImageAnalyzer {
 
     private String API_KEY = "YOUR_API_KEY_HERE";
-    private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+
+    private static final String MODEL = "gemini-2.5-flash";
+    private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/"+MODEL+":generateContent";
     
     private static final String PROMPT_SYSTEM = 
             "The user will be providing images taken from cheap security cameras, these images might be taken during the day or the night and the angle may vary. Images are usually taken top-down, during the night images may be blurry due to person's movements. Please reply him with a single keyword in the first line and a brief explanation of your choice in the second line, chosen among these:\n" +
