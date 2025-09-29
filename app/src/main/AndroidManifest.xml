@@ -65,7 +65,7 @@
         <activity
             android:name="online.avogadro.opencv4tasker.tasker.ActivityConfigCancelNotificationAction"
             android:exported="true"
-            android:icon="@mipmap/ai_image_analyzer"
+            android:icon="@android:drawable/ic_menu_delete"
             android:label="Cancel Notification">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
