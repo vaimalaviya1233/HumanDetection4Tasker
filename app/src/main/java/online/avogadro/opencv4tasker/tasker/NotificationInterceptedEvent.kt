@@ -23,7 +23,8 @@ import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultSucess
  */
 @TaskerInputRoot
 class NotificationInterceptedEventInput @JvmOverloads constructor(
-    @field:TaskerInputField("appNameFilter") var appNameFilter: String = ""
+    @field:TaskerInputField("appNameFilter") var appNameFilter: String = "",
+    @field:TaskerInputField("requireImages") var requireImages: Boolean = true
 )
 
 /**
@@ -67,10 +68,12 @@ class NotificationInterceptedEventHelper(config: TaskerPluginConfig<Notification
     override val outputClass = NotificationInterceptedEvent::class.java
     
     override fun addToStringBlurb(input: TaskerInput<NotificationInterceptedEventInput>, blurbBuilder: StringBuilder) {
+        val typeText = if (input.regular.requireImages) "with images" else "with or without images"
+
         if (input.regular.appNameFilter.isNotEmpty()) {
-            blurbBuilder.append(" monitoring notifications from apps containing '${input.regular.appNameFilter}'")
+            blurbBuilder.append(" monitoring notifications $typeText from apps containing '${input.regular.appNameFilter}'")
         } else {
-            blurbBuilder.append(" monitoring notifications with images from all apps")
+            blurbBuilder.append(" monitoring notifications $typeText from all apps")
         }
     }
 }
@@ -92,6 +95,11 @@ class NotificationInterceptedRunnerConditionEvent() : TaskerPluginRunnerConditio
 
     override fun getSatisfiedCondition(context: Context, input: TaskerInput<NotificationInterceptedEventInput>, update: NotificationInterceptedEvent?): TaskerPluginResultCondition<NotificationInterceptedEvent> {
         if (update == null) {
+            return TaskerPluginResultConditionUnsatisfied()
+        }
+
+        // Check if images are required and if the notification has images
+        if (input.regular.requireImages && update.imagePath.isEmpty()) {
             return TaskerPluginResultConditionUnsatisfied()
         }
 

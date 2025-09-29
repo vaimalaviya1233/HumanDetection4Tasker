@@ -17,8 +17,36 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="This event will trigger when notifications with images are received from matching apps."
+        android:text="This event will trigger when notifications are received from matching apps."
         android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Notification Type:"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <RadioGroup
+        android:id="@+id/radioGroupNotificationType"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp">
+
+        <RadioButton
+            android:id="@+id/radioOnlyWithImages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Only with images"
+            android:checked="true" />
+
+        <RadioButton
+            android:id="@+id/radioAlsoWithoutImages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Also without images" />
+
+    </RadioGroup>
 
     <TextView
         android:layout_width="match_parent"

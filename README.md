@@ -3,6 +3,7 @@ Plugin app for Tasker and MacroDroid to provide Humans Detection
 Licensed under GPL v3
 
 V 1.6.0:
+* ADDED: Notification listener can now optionally intercept notifications without images. Useful when tha app sends a notification without images but the image can be fetched via API.
 * CHANGED: updated to using Gemini Flash 2.5 instead of 2.0
 * CHANGED: updated to using Claude Sonnet 4.0 since 3.5 is being retired
 

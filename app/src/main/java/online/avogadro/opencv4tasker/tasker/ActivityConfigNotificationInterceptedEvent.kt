@@ -25,11 +25,19 @@ class ActivityConfigNotificationInterceptedEvent : Activity(), TaskerPluginConfi
     override fun assignFromInput(input: TaskerInput<NotificationInterceptedEventInput>) {
         // Set the text field state based on the input
         binding.editTextAppFilter.setText(input.regular.appNameFilter)
+
+        // Set the radio button state based on the input
+        if (input.regular.requireImages) {
+            binding.radioOnlyWithImages.isChecked = true
+        } else {
+            binding.radioAlsoWithoutImages.isChecked = true
+        }
     }
 
     override val inputForTasker: TaskerInput<NotificationInterceptedEventInput>
         get() = TaskerInput(NotificationInterceptedEventInput(
-            appNameFilter = binding.editTextAppFilter.text.toString().trim()
+            appNameFilter = binding.editTextAppFilter.text.toString().trim(),
+            requireImages = binding.radioOnlyWithImages.isChecked
         ))
 
     override val context get() = applicationContext

@@ -67,33 +67,38 @@ class NotificationInterceptorService : NotificationListenerService() {
             }
 
             Log.d(TAG, "Title: $title, Text: $text")
-            
-            // Check if notification has an image before processing
-            if (!imageExtractor.hasImage(notification)) {
-                Log.d(TAG, "No image found in notification, ignoring")
-                return
-            }
-            
-            // Try to extract image from notification
-            val imageBitmap = imageExtractor.extractImage(notification)
-            
-            if (imageBitmap != null) {
-                Log.d(TAG, "Image found in notification, saving to temp file")
-                
-                // Save image to temporary file
-                val imageFile = fileManager.saveImageToTemp(imageBitmap, packageName)
-                
-                if (imageFile != null) {
-                    Log.d(TAG, "Image saved to: ${imageFile.absolutePath}")
-                    
-                    // Trigger Tasker event
-                    triggerTaskerEvent(title, text, imageFile.absolutePath, packageName, appName)
+
+            var imagePath = ""
+
+            // Check if notification has an image and extract it if present
+            if (imageExtractor.hasImage(notification)) {
+                Log.d(TAG, "Image found in notification, extracting it")
+
+                // Try to extract image from notification
+                val imageBitmap = imageExtractor.extractImage(notification)
+
+                if (imageBitmap != null) {
+                    Log.d(TAG, "Image extracted, saving to temp file")
+
+                    // Save image to temporary file
+                    val imageFile = fileManager.saveImageToTemp(imageBitmap, packageName)
+
+                    if (imageFile != null) {
+                        Log.d(TAG, "Image saved to: ${imageFile.absolutePath}")
+                        imagePath = imageFile.absolutePath
+                    } else {
+                        Log.e(TAG, "Failed to save image to temporary file")
+                    }
                 } else {
-                    Log.e(TAG, "Failed to save image to temporary file")
+                    Log.d(TAG, "Failed to extract image from notification")
                 }
             } else {
-                Log.d(TAG, "No image found in notification, ignoring")
+                Log.d(TAG, "No image found in notification")
             }
+
+            // Trigger Tasker event for all notifications (with or without images)
+            // The filtering based on image requirement will happen in the event condition logic
+            triggerTaskerEvent(title, text, imagePath, packageName, appName)
             
         } catch (e: Exception) {
             Log.e(TAG, "Error processing notification", e)
