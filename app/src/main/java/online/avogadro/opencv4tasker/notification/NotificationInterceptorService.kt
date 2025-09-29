@@ -19,6 +19,21 @@ class NotificationInterceptorService : NotificationListenerService() {
         private const val TAG = "NotificationInterceptor"
         private const val TEMP_DIR = "notification_images"
         const val ACTION_NOTIFICATION_INTERCEPTED = "online.avogadro.opencv4tasker.NOTIFICATION_INTERCEPTED"
+
+        private var instance: NotificationInterceptorService? = null
+
+        fun getInstance(): NotificationInterceptorService? = instance
+
+        fun cancelNotificationByKey(notificationKey: String): Boolean {
+            return try {
+                instance?.cancelNotification(notificationKey)
+                Log.d(TAG, "Successfully canceled notification with key: $notificationKey")
+                true
+            } catch (e: Exception) {
+                Log.e(TAG, "Error canceling notification with key: $notificationKey", e)
+                false
+            }
+        }
     }
 
     private lateinit var imageExtractor: NotificationImageExtractor
@@ -29,6 +44,7 @@ class NotificationInterceptorService : NotificationListenerService() {
         Log.d(TAG, "NotificationInterceptorService created")
         imageExtractor = NotificationImageExtractor(this)
         fileManager = NotificationFileManager(this)
+        instance = this
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
@@ -50,7 +66,8 @@ class NotificationInterceptorService : NotificationListenerService() {
             // Extract basic notification info
             val notification = sbn.notification
             val packageName = sbn.packageName
-            
+            val notificationKey = sbn.key
+
             // Get app name
             val appName = getApplicationName(packageName)
 
@@ -61,7 +78,7 @@ class NotificationInterceptorService : NotificationListenerService() {
             if (DEBUG) {
                 // Trigger debug event with all notification.extras values
                 val debugText = buildDebugText(sbn.notification)
-                triggerTaskerEvent(title, debugText, "",packageName, appName );
+                triggerTaskerEvent(title, debugText, "", packageName, appName, notificationKey)
                 // triggerDebugEvent(debugText, sbn.packageName)
                 return;
             }
@@ -98,7 +115,7 @@ class NotificationInterceptorService : NotificationListenerService() {
 
             // Trigger Tasker event for all notifications (with or without images)
             // The filtering based on image requirement will happen in the event condition logic
-            triggerTaskerEvent(title, text, imagePath, packageName, appName)
+            triggerTaskerEvent(title, text, imagePath, packageName, appName, notificationKey)
             
         } catch (e: Exception) {
             Log.e(TAG, "Error processing notification", e)
@@ -138,18 +155,20 @@ class NotificationInterceptorService : NotificationListenerService() {
         notificationText: String,
         imagePath: String,
         packageName: String,
-        appName: String
+        appName: String,
+        notificationKey: String
     ) {
         try {
-            Log.d(TAG, "Triggering Tasker event with data: title=$title, text=$notificationText, imagePath=$imagePath, packageName=$packageName, appName=$appName")
+            Log.d(TAG, "Triggering Tasker event with data: title=$title, text=$notificationText, imagePath=$imagePath, packageName=$packageName, appName=$appName, key=$notificationKey")
 
-            val notificationData = NotificationInterceptedEvent(title, notificationText, imagePath, appName, packageName)
+            val notificationData = NotificationInterceptedEvent(title, notificationText, imagePath, appName, packageName, notificationKey)
 
             notificationData.notificationTitle = title
             notificationData.notificationText = notificationText
             notificationData.appPackage = packageName
             notificationData.appName = appName
             notificationData.imagePath = imagePath
+            notificationData.notificationKey = notificationKey
 
             if (1==1) {
                 NotificationRaiser.raiseAlarmEvent(OpenCV4TaskerApplication.getInstance(), notificationData)
@@ -165,6 +184,7 @@ class NotificationInterceptorService : NotificationListenerService() {
                 putExtra("image_path", imagePath)
                 putExtra("app_package", packageName)
                 putExtra("app_name", appName)
+                putExtra("notification_key", notificationKey)
             }
             
             sendBroadcast(intent)
@@ -179,8 +199,11 @@ class NotificationInterceptorService : NotificationListenerService() {
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG, "NotificationInterceptorService destroyed")
-        
+
         // Clean up old temporary files
         fileManager.cleanupOldFiles()
+
+        // Clear the instance reference
+        instance = null
     }
 }

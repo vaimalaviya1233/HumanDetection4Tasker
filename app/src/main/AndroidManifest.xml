@@ -62,6 +62,16 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name="online.avogadro.opencv4tasker.tasker.ActivityConfigCancelNotificationAction"
+            android:exported="true"
+            android:icon="@mipmap/ai_image_analyzer"
+            android:label="Cancel Notification">
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
+            </intent-filter>
+        </activity>
+
         <!-- Notification Listener Service -->
         <service android:name="online.avogadro.opencv4tasker.notification.NotificationInterceptorService"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"

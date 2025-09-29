@@ -36,22 +36,26 @@ class NotificationInterceptedEvent(
     @get:TaskerOutputVariable("notification_title")
     @TaskerInputField(key="notification_title")
     var notificationTitle: String = "",
-    
+
     @get:TaskerOutputVariable("notification_text")
     @TaskerInputField(key="notification_text")
     var notificationText: String = "",
-    
+
     @get:TaskerOutputVariable("image_path")
     @TaskerInputField(key="image_path")
     var imagePath: String = "",
-    
+
     @get:TaskerOutputVariable("app_package")
     @TaskerInputField(key="app_package")
     var appPackage: String = "",
-    
+
     @get:TaskerOutputVariable("app_name")
     @TaskerInputField(key="app_name")
-    var appName: String = ""
+    var appName: String = "",
+
+    @get:TaskerOutputVariable("notification_key")
+    @TaskerInputField(key="notification_key")
+    var notificationKey: String = ""
 )
 
 /**
