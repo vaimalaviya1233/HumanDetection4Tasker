@@ -17,7 +17,7 @@
     <string name="app_name_description">Human-readable name of the app that sent the notification</string>
     
     <!-- AI Engine Labels -->
-    <string name="engine_claude">Claude Sonnet 4.0 (online)</string>
+    <string name="engine_claude">Claude Sonnet 4.5 (online)</string>
     <string name="engine_gemini">Gemini 2.5 Flash (online)</string>
     <string name="engine_openrouter">OpenRouter (online)</string>
     <string name="engine_tensorflow">Tensorflow Lite (local device)</string>

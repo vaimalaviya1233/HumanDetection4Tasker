@@ -4,8 +4,9 @@ Licensed under GPL v3
 
 V 1.6.0:
 * ADDED: Notification listener can now optionally intercept notifications without images. Useful when tha app sends a notification without images but the image can be fetched via API.
+* ADDED: "Cancel Notification" action: useful to remove false positives' notifications.
 * CHANGED: updated to using Gemini Flash 2.5 instead of 2.0
-* CHANGED: updated to using Claude Sonnet 4.0 since 3.5 is being retired
+* CHANGED: updated to using Claude Sonnet 4.5 since 3.5 is being retired
 
 V 1.5.0:
 * ADDED: support OpenRouter.AI for cloud queries: allowing completely free online image detection!
