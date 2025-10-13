@@ -14,11 +14,13 @@ import online.avogadro.opencv4tasker.app.SharedPreferencesHelper
 import online.avogadro.opencv4tasker.claudeai.HumansDetectorClaudeAI
 import online.avogadro.opencv4tasker.databinding.ActivityConfigDetectHumansBinding;
 import online.avogadro.opencv4tasker.gemini.HumansDetectorGemini
+import online.avogadro.opencv4tasker.openrouter.HumansDetectorOpenRouter
 import online.avogadro.opencv4tasker.tensorflowlite.HumansDetectorTensorFlow
 
 const val ENGINE_CLAUDEAI = "CLAUDE"
 const val ENGINE_TENSORFLOW = "TENSORFLOW"
 const val ENGINE_GEMINI = "GEMINI"
+const val ENGINE_OPENROUTER = "OPENROUTER"
 
 class DetectHumansActionHelper(config: TaskerPluginConfig<DetectHumansInput>) : TaskerPluginConfigHelper<DetectHumansInput, DetectHumansOutput, DetectHumansActionRunner>(config) {
     override val runnerClass: Class<DetectHumansActionRunner> get() = DetectHumansActionRunner::class.java
@@ -39,6 +41,7 @@ class ActivityConfigDetectHumansAction : Activity(), TaskerPluginConfig<DetectHu
         // Reset all radio buttons
         binding?.radioEngineClaudeAI?.isChecked = false
         binding?.radioEngineGemini?.isChecked = false
+        binding?.radioEngineOpenRouter?.isChecked = false
         binding?.radioEngineTensorflowLite?.isChecked = false
 
         // Set the appropriate radio button based on the engine
@@ -46,6 +49,8 @@ class ActivityConfigDetectHumansAction : Activity(), TaskerPluginConfig<DetectHu
             binding?.radioEngineClaudeAI?.isChecked = true
         } else if (ENGINE_GEMINI.equals(input.regular.engine)) {
             binding?.radioEngineGemini?.isChecked = true
+        } else if (ENGINE_OPENROUTER.equals(input.regular.engine)) {
+            binding?.radioEngineOpenRouter?.isChecked = true
         } else { // null or anything else
             // Local Tensorflow == default (backward compatibility!)
             binding?.radioEngineTensorflowLite?.isChecked = true
@@ -68,9 +73,21 @@ class ActivityConfigDetectHumansAction : Activity(), TaskerPluginConfig<DetectHu
         if ("".equals(geminiApiKey)) {
             binding?.radioEngineGemini?.isEnabled = false
             binding?.radioEngineGemini?.isChecked = false
-            
+
             // Default to TensorFlow if Gemini was selected but now disabled
             if (ENGINE_GEMINI.equals(input.regular.engine)) {
+                binding?.radioEngineTensorflowLite?.isChecked = true
+            }
+        }
+
+        // disable OpenRouter options if there's no API KEY
+        var openRouterApiKey = SharedPreferencesHelper.get(this, SharedPreferencesHelper.OPENROUTER_API_KEY)
+        if ("".equals(openRouterApiKey)) {
+            binding?.radioEngineOpenRouter?.isEnabled = false
+            binding?.radioEngineOpenRouter?.isChecked = false
+
+            // Default to TensorFlow if OpenRouter was selected but now disabled
+            if (ENGINE_OPENROUTER.equals(input.regular.engine)) {
                 binding?.radioEngineTensorflowLite?.isChecked = true
             }
         }
@@ -82,6 +99,8 @@ class ActivityConfigDetectHumansAction : Activity(), TaskerPluginConfig<DetectHu
             engine = ENGINE_CLAUDEAI
         } else if (binding?.radioEngineGemini?.isChecked == true) {
             engine = ENGINE_GEMINI
+        } else if (binding?.radioEngineOpenRouter?.isChecked == true) {
+            engine = ENGINE_OPENROUTER
         }
         return TaskerInput<DetectHumansInput>(DetectHumansInput(binding?.editFileName?.text?.toString(), engine))
     }
@@ -123,6 +142,13 @@ class DetectHumansActionRunner : TaskerPluginRunnerAction<DetectHumansInput, Det
             resultReason = htg.getLastResponse()
             if (result==-1)
                 resultError = htg.getLastError()
+        } else if (ENGINE_OPENROUTER.equals(input.regular.engine)) {
+            val hto = HumansDetectorOpenRouter()
+            hto.setup(context)
+            result = hto.detectPerson(context, input.regular.imagePath)
+            resultReason = hto.getLastResponse()
+            if (result==-1)
+                resultError = hto.getLastError()
         } else {
             // default = TENSORFLOW
             var path = input.regular.imagePath;

@@ -15,10 +15,12 @@ import online.avogadro.opencv4tasker.app.Util
 import online.avogadro.opencv4tasker.claudeai.HumansDetectorClaudeAI
 import online.avogadro.opencv4tasker.databinding.ActivityConfigAnalyzeImageBinding
 import online.avogadro.opencv4tasker.gemini.HumansDetectorGemini
+import online.avogadro.opencv4tasker.openrouter.HumansDetectorOpenRouter
 import java.io.File
 
 const val ENGINE_ANALYZE_CLAUDEAI = "CLAUDE"
 const val ENGINE_ANALYZE_GEMINI = "GEMINI"
+const val ENGINE_ANALYZE_OPENROUTER = "OPENROUTER"
 
 class AnalyzeImageActionHelper(config: TaskerPluginConfig<AnalyzeImageInput>) : TaskerPluginConfigHelper<AnalyzeImageInput, AnalyzeImageOutput, AnalyzeImageActionRunner>(config) {
     override val runnerClass: Class<AnalyzeImageActionRunner> get() = AnalyzeImageActionRunner::class.java
@@ -41,15 +43,19 @@ class ActivityConfigAnalyzeImageAction : Activity(), TaskerPluginConfig<AnalyzeI
         // Reset all radio buttons
         binding.radioEngineClaudeAI.isChecked = false
         binding.radioEngineGemini.isChecked = false
+        binding.radioEngineOpenRouter.isChecked = false
 
         // Set the appropriate radio button based on the engine
         when (input.regular.engine) {
             ENGINE_ANALYZE_CLAUDEAI -> binding.radioEngineClaudeAI.isChecked = true
             ENGINE_ANALYZE_GEMINI -> binding.radioEngineGemini.isChecked = true
+            ENGINE_ANALYZE_OPENROUTER -> binding.radioEngineOpenRouter.isChecked = true
             else -> {
                 // Default to Claude if available
                 if (isClaudeAvailable()) {
                     binding.radioEngineClaudeAI.isChecked = true
+                } else if (isOpenRouterAvailable()) {
+                    binding.radioEngineOpenRouter.isChecked = true
                 } else {
                     binding.radioEngineGemini.isChecked = true
                 }
@@ -71,10 +77,25 @@ class ActivityConfigAnalyzeImageAction : Activity(), TaskerPluginConfig<AnalyzeI
         if (!isGeminiAvailable()) {
             binding.radioEngineGemini.isEnabled = false
             binding.radioEngineGemini.isChecked = false
-            
+
             // Default to Claude if Gemini was selected but now disabled
             if (ENGINE_ANALYZE_GEMINI == input.regular.engine) {
                 binding.radioEngineClaudeAI.isChecked = true
+            }
+        }
+
+        // Disable OpenRouter option if no API KEY is available
+        if (!isOpenRouterAvailable()) {
+            binding.radioEngineOpenRouter.isEnabled = false
+            binding.radioEngineOpenRouter.isChecked = false
+
+            // Default to Claude if OpenRouter was selected but now disabled
+            if (ENGINE_ANALYZE_OPENROUTER == input.regular.engine) {
+                if (isClaudeAvailable()) {
+                    binding.radioEngineClaudeAI.isChecked = true
+                } else {
+                    binding.radioEngineGemini.isChecked = true
+                }
             }
         }
     }
@@ -89,10 +110,16 @@ class ActivityConfigAnalyzeImageAction : Activity(), TaskerPluginConfig<AnalyzeI
         return geminiApiKey.isNotEmpty()
     }
 
+    private fun isOpenRouterAvailable(): Boolean {
+        val openRouterApiKey = SharedPreferencesHelper.get(this, SharedPreferencesHelper.OPENROUTER_API_KEY)
+        return openRouterApiKey.isNotEmpty()
+    }
+
     override val inputForTasker: TaskerInput<AnalyzeImageInput> get() {
         val engine = when {
             binding.radioEngineClaudeAI.isChecked -> ENGINE_ANALYZE_CLAUDEAI
             binding.radioEngineGemini.isChecked -> ENGINE_ANALYZE_GEMINI
+            binding.radioEngineOpenRouter.isChecked -> ENGINE_ANALYZE_OPENROUTER
             else -> ENGINE_ANALYZE_CLAUDEAI // Default to Claude
         }
         
@@ -158,6 +185,18 @@ class AnalyzeImageActionRunner : TaskerPluginRunnerAction<AnalyzeImageInput, Ana
                     )
                     if (response.isEmpty()) {
                         error = gemini.getLastError()
+                    }
+                }
+                ENGINE_ANALYZE_OPENROUTER -> {
+                    val openRouter = HumansDetectorOpenRouter()
+                    openRouter.setup(context)
+                    response = openRouter.analyzeImage(
+                        input.regular.systemPrompt ?: "",
+                        input.regular.userPrompt,
+                        newPath
+                    )
+                    if (response.isEmpty()) {
+                        error = openRouter.getLastError()
                     }
                 }
                 else -> {

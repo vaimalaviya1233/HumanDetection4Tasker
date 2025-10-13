@@ -46,6 +46,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/engine_gemini" />
+
+            <RadioButton
+                android:id="@+id/radioEngineOpenRouter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/engine_openrouter" />
         </RadioGroup>
 
         <TextView
