@@ -23,8 +23,6 @@
     <string name="engine_tensorflow">Tensorflow Lite (local device)</string>
 
     <!-- Model selection labels -->
-    <string name="claude_model_label">Claude Model</string>
-    <string name="gemini_model_label">Gemini Model</string>
     <string name="model_custom">Custom…</string>
     <string name="custom_model_hint_claude">e.g. claude-sonnet-4-6</string>
     <string name="custom_model_hint_gemini">e.g. gemini-2.5-flash</string>
