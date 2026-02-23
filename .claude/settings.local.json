@@ -3,7 +3,8 @@
     "allow": [
       "WebSearch",
       "Bash(mkdir:*)",
-      "WebFetch(domain:stackoverflow.com)"
+      "WebFetch(domain:stackoverflow.com)",
+      "Bash(git diff:*)"
     ],
     "deny": [],
     "ask": []
