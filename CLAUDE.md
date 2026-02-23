@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AWS4Tasker (formerly OpenCV4Tasker) is an Android plugin for Tasker and MacroDroid that provides AI-powered image analysis capabilities. The app can detect humans in images and perform general-purpose image analysis using multiple AI engines including Claude AI, Google Gemini, and TensorFlow Lite.
+AWS4Tasker (formerly OpenCV4Tasker) is an Android plugin for Tasker and MacroDroid that provides AI-powered image analysis capabilities. The app can detect humans in images and perform general-purpose image analysis using multiple AI engines including Claude AI, Google Gemini, OpenRouter, and MediaPipe (local).
 
 ## Build Commands
 
@@ -36,27 +36,30 @@ AWS4Tasker (formerly OpenCV4Tasker) is an Android plugin for Tasker and MacroDro
   - `MainActivity` - Main UI for testing image analysis
   - `ConfigActivity` - General configuration
 - **AI Engines**: Multiple implementations of image analysis:
-  - `HumansDetectorClaudeAI` - Claude AI integration for human detection
-  - `HumansDetectorGemini` - Google Gemini integration  
-  - `HumansDetectorTensorFlow` - Local TensorFlow Lite processing
+  - `HumansDetectorClaudeAI` - Claude AI integration (default model: `claude-sonnet-4-6`)
+  - `HumansDetectorGemini` - Google Gemini integration (default model: `gemini-2.5-flash`)
+  - `HumansDetectorOpenRouter` - OpenRouter integration (user-configurable model)
+  - `HumansDetectorTensorFlow` - Local processing via MediaPipe Tasks Vision (class name kept for backward compatibility)
   - `AIImageAnalyzer` - Common interface for AI-based image analysis
 
 ### Tasker Plugin System
 
 The app integrates with Tasker/MacroDroid through:
-- **Actions**: 
+- **Actions**:
   - `DetectHumansActionHelper` - Human detection in images
   - `AnalyzeImageActionHelper` - General AI image analysis
+  - `CancelNotificationActionHelper` - Cancels a notification by its key
 - **Events**:
-  - `NotificationInterceptedEvent` - Intercepts notifications with images
+  - `NotificationInterceptedEvent` - Intercepts notifications (with or without images)
 - **Configuration Activities**:
   - `ActivityConfigDetectHumansAction`
-  - `ActivityConfigAnalyzeImageAction` 
+  - `ActivityConfigAnalyzeImageAction`
+  - `ActivityConfigCancelNotificationAction`
   - `ActivityConfigNotificationInterceptedEvent`
 
 ### Notification Interception
 
-New notification interception system includes:
+The notification interception system includes:
 - `NotificationInterceptorService` - Core notification listener service
 - `NotificationImageExtractor` - Extracts images from notifications
 - `NotificationFileManager` - Manages temporary image files
@@ -64,25 +67,26 @@ New notification interception system includes:
 ### Key Dependencies
 
 - Tasker Plugin Library: `com.joaomgcd:taskerpluginlibrary:0.4.10`
-- TensorFlow Lite: `org.tensorflow:tensorflow-lite:2.5.0` with related libraries
+- MediaPipe Tasks Vision: `com.google.mediapipe:tasks-vision:0.10.21` (local object detection, replaces TensorFlow Lite)
 - AndroidX libraries for modern Android development
 - Kotlin support with Java interop
 
 ## Development Notes
 
-- **Target SDK**: 33, **Min SDK**: 30 (Android 11+)
+- **Target SDK**: 36, **Min SDK**: 30 (Android 11+)
 - **Language**: Mixed Java/Kotlin codebase
 - **Permissions**: Requires storage, internet, notification access, and battery optimization bypass
-- **Build Tools**: Gradle with Android build tools 8.2.2
+- **Build Tools**: Android Gradle Plugin 8.9.0, Gradle 8.11.1, Build Tools 35.0.0
 - The project uses view binding and data binding
-- TensorFlow models are stored in `app/src/main/assets/`
+- MediaPipe model is stored in `app/src/main/assets/`
 - Package name: `online.avogadro.opencv4tasker`
 
 ## Engine Configuration
 
-The app supports three AI engines selected via radio buttons:
-- **CLAUDE**: Cloud-based Claude AI analysis
-- **GEMINI**: Google Gemini integration
-- **TENSORFLOW**: Local TensorFlow Lite processing (default for backward compatibility)
+The app supports four AI engines selected via radio buttons:
+- **CLAUDE**: Cloud-based Claude AI analysis (`claude-sonnet-4-6` by default, configurable)
+- **GEMINI**: Google Gemini integration (`gemini-2.5-flash` by default, configurable)
+- **OPENROUTER**: OpenRouter cloud proxy (user-configurable model)
+- **TENSORFLOW**: Local MediaPipe processing (default for backward compatibility; class/key name kept as `TENSORFLOW`)
 
 Engine selection is persisted using `SharedPreferencesHelper` and each engine implements the `AIImageAnalyzer` interface for consistency.

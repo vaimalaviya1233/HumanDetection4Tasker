@@ -28,15 +28,15 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ai_image_analyzer_round"
         android:theme="@style/AppTheme">
-        <activity android:name="online.avogadro.opencv4tasker.MainActivity" />
-        <activity android:name="online.avogadro.opencv4tasker.ConfigActivity" />
+        <activity android:name="online.avogadro.opencv4tasker.MainActivity"
+            android:exported="false" />
+        <activity android:name="online.avogadro.opencv4tasker.ConfigActivity"
+            android:exported="false" />
         <activity
             android:name="online.avogadro.opencv4tasker.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

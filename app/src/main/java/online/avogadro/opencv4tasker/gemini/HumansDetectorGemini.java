@@ -25,8 +25,10 @@ public class HumansDetectorGemini implements AIImageAnalyzer {
 
     private String API_KEY = "YOUR_API_KEY_HERE";
 
-    private static final String MODEL = "gemini-2.5-flash";
-    private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/"+MODEL+":generateContent";
+    private static final String API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/";
+    public static final String DEFAULT_GEMINI_MODEL = "gemini-2.5-flash";
+
+    private String model = DEFAULT_GEMINI_MODEL;
     
     private static final String PROMPT_SYSTEM = 
             "The user will be providing images taken from cheap security cameras, these images might be taken during the day or the night and the angle may vary. Images are usually taken top-down, during the night images may be blurry due to person's movements. Please reply him with a single keyword in the first line and a brief explanation of your choice in the second line, chosen among these:\n" +
@@ -38,7 +40,6 @@ public class HumansDetectorGemini implements AIImageAnalyzer {
             "Ignore any shadows";
 
     static final String TAG = "HumansDetectorGemini";
-    public static final String GEMINI_MODEL = "gemini-pro-vision";
 
     private static final String CONTENT_TYPE_JPG = "image/jpeg";
     private static final String CONTENT_TYPE_PNG = "image/png";
@@ -61,6 +62,9 @@ public class HumansDetectorGemini implements AIImageAnalyzer {
     @Override
     public void setup(Context ctx) throws IOException {
         API_KEY = SharedPreferencesHelper.get(ctx, SharedPreferencesHelper.GEMINI_API_KEY);
+        String savedModel = SharedPreferencesHelper.get(ctx, SharedPreferencesHelper.GEMINI_MODEL);
+        if (savedModel != null && !savedModel.isEmpty())
+            model = savedModel;
     }
 
     public int detectPerson(Context ctx, String imagePath) {
@@ -112,7 +116,7 @@ public class HumansDetectorGemini implements AIImageAnalyzer {
     public String analyzeImage(String systemPrompt, String userPrompt, String imagePath) throws IOException, JSONException {
         lastHttpResponse = null;
         // API Key is included in the URL for Gemini API
-        URL url = new URL(API_URL + "?key=" + API_KEY);
+        URL url = new URL(API_BASE_URL + model + ":generateContent?key=" + API_KEY);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");
         connection.setRequestProperty("Content-Type", "application/json");

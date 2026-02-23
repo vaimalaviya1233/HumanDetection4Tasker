@@ -37,7 +37,9 @@ public class HumansDetectorClaudeAI implements AIImageAnalyzer {
             "Ignore any shadows";
 
     static final String TAG = "HumansDetectorClaudeAI";
-    public static final String CLAUDE_MODEL = "claude-sonnet-4-5-20250929"; // was: ""claude-3-5-sonnet-latest";  "claude-sonnet-4-20250514"
+    public static final String DEFAULT_CLAUDE_MODEL = "claude-sonnet-4-6";
+
+    private String model = DEFAULT_CLAUDE_MODEL;
 
     private static final String CONTENT_TYPE_JPG="image/jpeg";
     private static final String CONTENT_TYPE_PNG="image/png";
@@ -59,7 +61,10 @@ public class HumansDetectorClaudeAI implements AIImageAnalyzer {
 
     @Override
     public void setup(Context ctx) throws IOException {
-       API_KEY = SharedPreferencesHelper.get(ctx, SharedPreferencesHelper.CLAUDE_API_KEY);
+        API_KEY = SharedPreferencesHelper.get(ctx, SharedPreferencesHelper.CLAUDE_API_KEY);
+        String savedModel = SharedPreferencesHelper.get(ctx, SharedPreferencesHelper.CLAUDE_MODEL);
+        if (savedModel != null && !savedModel.isEmpty())
+            model = savedModel;
     }
 
     public int detectPerson(Context ctx, String imagePath) {
@@ -121,7 +126,7 @@ public class HumansDetectorClaudeAI implements AIImageAnalyzer {
         String imageBase64 = encodeImageToBase64(imagePath);
 
         JSONObject jsonBody = new JSONObject();
-        jsonBody.put("model", CLAUDE_MODEL);
+        jsonBody.put("model", model);
         jsonBody.put("max_tokens", 1000);
         jsonBody.put("temperature", 0.0f);
         jsonBody.put("system", systemPrompt);

@@ -12,7 +12,7 @@ import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultErrorWithOutput
 import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultSucess
 import online.avogadro.opencv4tasker.app.SharedPreferencesHelper
 import online.avogadro.opencv4tasker.claudeai.HumansDetectorClaudeAI
-import online.avogadro.opencv4tasker.databinding.ActivityConfigDetectHumansBinding;
+import online.avogadro.opencv4tasker.databinding.ActivityConfigDetectHumansBinding
 import online.avogadro.opencv4tasker.gemini.HumansDetectorGemini
 import online.avogadro.opencv4tasker.openrouter.HumansDetectorOpenRouter
 import online.avogadro.opencv4tasker.tensorflowlite.HumansDetectorTensorFlow
@@ -36,73 +36,73 @@ class ActivityConfigDetectHumansAction : Activity(), TaskerPluginConfig<DetectHu
     private lateinit var binding: ActivityConfigDetectHumansBinding
 
     override fun assignFromInput(input: TaskerInput<DetectHumansInput>) {
-        binding?.editFileName?.setText(input.regular.imagePath);
+        binding.editFileName.setText(input.regular.imagePath);
 
         // Reset all radio buttons
-        binding?.radioEngineClaudeAI?.isChecked = false
-        binding?.radioEngineGemini?.isChecked = false
-        binding?.radioEngineOpenRouter?.isChecked = false
-        binding?.radioEngineTensorflowLite?.isChecked = false
+        binding.radioEngineClaudeAI.isChecked = false
+        binding.radioEngineGemini.isChecked = false
+        binding.radioEngineOpenRouter.isChecked = false
+        binding.radioEngineTensorflowLite.isChecked = false
 
         // Set the appropriate radio button based on the engine
         if (ENGINE_CLAUDEAI.equals(input.regular.engine)) {
-            binding?.radioEngineClaudeAI?.isChecked = true
+            binding.radioEngineClaudeAI.isChecked = true
         } else if (ENGINE_GEMINI.equals(input.regular.engine)) {
-            binding?.radioEngineGemini?.isChecked = true
+            binding.radioEngineGemini.isChecked = true
         } else if (ENGINE_OPENROUTER.equals(input.regular.engine)) {
-            binding?.radioEngineOpenRouter?.isChecked = true
+            binding.radioEngineOpenRouter.isChecked = true
         } else { // null or anything else
             // Local Tensorflow == default (backward compatibility!)
-            binding?.radioEngineTensorflowLite?.isChecked = true
+            binding.radioEngineTensorflowLite.isChecked = true
         }
 
         // disable Claude options if there's no API KEY
         var claudeApiKey = SharedPreferencesHelper.get(this, SharedPreferencesHelper.CLAUDE_API_KEY)
         if ("".equals(claudeApiKey)) {
-            binding?.radioEngineClaudeAI?.isEnabled = false
-            binding?.radioEngineClaudeAI?.isChecked = false
-            
+            binding.radioEngineClaudeAI.isEnabled = false
+            binding.radioEngineClaudeAI.isChecked = false
+
             // Default to TensorFlow if Claude was selected but now disabled
             if (ENGINE_CLAUDEAI.equals(input.regular.engine)) {
-                binding?.radioEngineTensorflowLite?.isChecked = true
+                binding.radioEngineTensorflowLite.isChecked = true
             }
         }
 
         // disable Gemini options if there's no API KEY
         var geminiApiKey = SharedPreferencesHelper.get(this, SharedPreferencesHelper.GEMINI_API_KEY)
         if ("".equals(geminiApiKey)) {
-            binding?.radioEngineGemini?.isEnabled = false
-            binding?.radioEngineGemini?.isChecked = false
+            binding.radioEngineGemini.isEnabled = false
+            binding.radioEngineGemini.isChecked = false
 
             // Default to TensorFlow if Gemini was selected but now disabled
             if (ENGINE_GEMINI.equals(input.regular.engine)) {
-                binding?.radioEngineTensorflowLite?.isChecked = true
+                binding.radioEngineTensorflowLite.isChecked = true
             }
         }
 
         // disable OpenRouter options if there's no API KEY
         var openRouterApiKey = SharedPreferencesHelper.get(this, SharedPreferencesHelper.OPENROUTER_API_KEY)
         if ("".equals(openRouterApiKey)) {
-            binding?.radioEngineOpenRouter?.isEnabled = false
-            binding?.radioEngineOpenRouter?.isChecked = false
+            binding.radioEngineOpenRouter.isEnabled = false
+            binding.radioEngineOpenRouter.isChecked = false
 
             // Default to TensorFlow if OpenRouter was selected but now disabled
             if (ENGINE_OPENROUTER.equals(input.regular.engine)) {
-                binding?.radioEngineTensorflowLite?.isChecked = true
+                binding.radioEngineTensorflowLite.isChecked = true
             }
         }
     }
 
     override val inputForTasker: TaskerInput<DetectHumansInput> get() {
         var engine = ENGINE_TENSORFLOW  // fail-safe local default
-        if (binding?.radioEngineClaudeAI?.isChecked == true) {
+        if (binding.radioEngineClaudeAI.isChecked) {
             engine = ENGINE_CLAUDEAI
-        } else if (binding?.radioEngineGemini?.isChecked == true) {
+        } else if (binding.radioEngineGemini.isChecked) {
             engine = ENGINE_GEMINI
-        } else if (binding?.radioEngineOpenRouter?.isChecked == true) {
+        } else if (binding.radioEngineOpenRouter.isChecked) {
             engine = ENGINE_OPENROUTER
         }
-        return TaskerInput<DetectHumansInput>(DetectHumansInput(binding?.editFileName?.text?.toString(), engine))
+        return TaskerInput<DetectHumansInput>(DetectHumansInput(binding.editFileName.text?.toString(), engine))
     }
 
     override val context get() = applicationContext

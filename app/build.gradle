@@ -3,8 +3,8 @@ apply plugin: 'org.jetbrains.kotlin.android'
 // apply plugin: 'com.google.gms.google-services'
 
 android {
-    compileSdkVersion 34
-    buildToolsVersion "30.0.3"
+    compileSdkVersion 36
+    buildToolsVersion "35.0.0"
     // viewBinding true
     buildFeatures {
         viewBinding true
@@ -13,9 +13,9 @@ android {
     defaultConfig {
         applicationId "online.avogadro.opencv4tasker"
         minSdkVersion 30
-        targetSdkVersion 33
-        versionCode 432
-        versionName "4.3.0"
+        targetSdkVersion 36
+        versionCode 1700
+        versionName "1.7.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
 
@@ -65,12 +65,8 @@ dependencies {
     // ML Kit Object Detection
     // implementation 'com.google.mlkit:object-detection:17.0.1'
 
-    // Tensorflow based detection
-    implementation 'org.tensorflow:tensorflow-lite:2.5.0'
-    implementation 'org.tensorflow:tensorflow-lite-support:0.3.0'
-    implementation 'org.tensorflow:tensorflow-lite-metadata:0.1.0'
-    implementation 'org.tensorflow:tensorflow-lite-task-vision:0.4.0'
-    implementation 'org.tensorflow:tensorflow-lite-support:0.4.0'
+    // MediaPipe Tasks Vision (replaces tensorflow-lite-task-vision, compiled with 16KB ELF alignment)
+    implementation 'com.google.mediapipe:tasks-vision:0.10.21'
 
 //    implementation project(':opencv')
 

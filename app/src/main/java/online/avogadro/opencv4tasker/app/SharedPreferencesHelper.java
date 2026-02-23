@@ -12,6 +12,9 @@ public class SharedPreferencesHelper {
     public static final String GEMINI_API_KEY = "GEMINI_API_KEY";
     public static final String OPENROUTER_API_KEY = "OPENROUTER_API_KEY";
     public static final String OPENROUTER_MODEL = "OPENROUTER_MODEL";
+    public static final String DEFAULT_OPENROUTER_MODEL = "qwen/qwen3-vl-30b-a3b-thinking";
+    public static final String CLAUDE_MODEL = "CLAUDE_MODEL";
+    public static final String GEMINI_MODEL = "GEMINI_MODEL";
     public static final String LAST_IMAGE_PATH = "LAST_IMAGE_PATH";
     public static final String NOTIFICATION_EVENT_ENABLED = "NOTIFICATION_EVENT_ENABLED";
     private static final String PASSWORD = "u2fg393ujk.%!kspa5fg393ujk.%!kra"; // Not recommended

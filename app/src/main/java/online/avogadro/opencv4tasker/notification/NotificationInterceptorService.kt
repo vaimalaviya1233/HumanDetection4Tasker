@@ -170,14 +170,14 @@ class NotificationInterceptorService : NotificationListenerService() {
             notificationData.imagePath = imagePath
             notificationData.notificationKey = notificationKey
 
+            // NOTE: The broadcast implementation below is intentionally kept as dead code for future reference.
+            // The active implementation uses NotificationRaiser (Tasker event approach).
             if (1==1) {
                 NotificationRaiser.raiseAlarmEvent(OpenCV4TaskerApplication.getInstance(), notificationData)
                 return;
             }
 
-            // old code...
-
-            // Create broadcast intent with notification data
+            // Broadcast approach — kept for reference, not currently used
             val intent = Intent(ACTION_NOTIFICATION_INTERCEPTED).apply {
                 putExtra("notification_title", title)
                 putExtra("notification_text", notificationText)
@@ -186,9 +186,9 @@ class NotificationInterceptorService : NotificationListenerService() {
                 putExtra("app_name", appName)
                 putExtra("notification_key", notificationKey)
             }
-            
+
             sendBroadcast(intent)
-            
+
             Log.d(TAG, "Broadcast sent successfully")
             
         } catch (e: Exception) {

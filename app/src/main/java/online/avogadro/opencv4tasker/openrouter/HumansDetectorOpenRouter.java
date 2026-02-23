@@ -24,7 +24,7 @@ import online.avogadro.opencv4tasker.app.Util;
 public class HumansDetectorOpenRouter implements AIImageAnalyzer {
 
     private String API_KEY = "YOUR_API_KEY_HERE";
-    private String MODEL_NAME = "qwen/qwen2.5-vl-32b-instruct:free";
+    private String MODEL_NAME = SharedPreferencesHelper.DEFAULT_OPENROUTER_MODEL;
     private static final String API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
     private static final String PROMPT_SYSTEM =
@@ -53,7 +53,7 @@ public class HumansDetectorOpenRouter implements AIImageAnalyzer {
         API_KEY = SharedPreferencesHelper.get(ctx, SharedPreferencesHelper.OPENROUTER_API_KEY);
         MODEL_NAME = SharedPreferencesHelper.get(ctx, SharedPreferencesHelper.OPENROUTER_MODEL);
         if (MODEL_NAME == null || MODEL_NAME.isEmpty()) {
-            MODEL_NAME = "qwen/qwen2.5-vl-32b-instruct:free";
+            MODEL_NAME = SharedPreferencesHelper.DEFAULT_OPENROUTER_MODEL;
         }
     }
 
