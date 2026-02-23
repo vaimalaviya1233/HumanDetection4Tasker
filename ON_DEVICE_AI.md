@@ -87,15 +87,111 @@ Su Snapdragon 8 Elite (S25 Ultra) con LiteRT + NPU:
 
 ---
 
-## ⛔ Limitazione bloccante per AWS4Tasker
+## ⛔ Limitazione bloccante: ML Kit GenAI è foreground-only
 
 > **"GenAI API inference is permitted only when the app is the top foreground application"**
+> **"including using a foreground service, will result in an `ErrorCode.BACKGROUND_USE_BLOCKED` response"**
 
-L'ML Kit GenAI **non funziona in background**. Poiché AWS4Tasker viene tipicamente invocato da Tasker/MacroDroid come action in background, questa limitazione rende l'integrazione impraticabile allo stato attuale.
+Questa restrizione è **deliberata e hardcoded in AICore**. Non esiste workaround ufficiale:
+- Non funziona con `ForegroundService` (bloccato esplicitamente)
+- Non funziona con `WorkManager`
+- Non funziona se l'app è in background
 
-Un possibile workaround sarebbe lanciare una `Activity` temporanea che va in foreground, esegue l'inference e si chiude — ma è un approccio non elegante e con UX problematica.
+Poiché AWS4Tasker viene tipicamente invocato da Tasker/MacroDroid come action in background, questa limitazione rende l'integrazione impraticabile allo stato attuale.
 
-**Stato:** ⏸ In attesa che Google rimuova il vincolo foreground-only, o che emerga un workaround affidabile.
+**Stato:** ⏸ In attesa che Google rimuova il vincolo foreground-only.
+
+---
+
+## Indagine su alternative proprietarie (Samsung / Pixel)
+
+### Samsung Neural SDK
+- Storico SDK proprietario Samsung per inferenza neurale su Exynos/Snapdragon
+- **❌ Non più disponibile per sviluppatori terze parti** (download policy cambiata)
+- Sostituito da Exynos AI Studio (toolchain di compilazione modelli, non un'API runtime pubblica)
+
+### Samsung Galaxy AI Engine / Exynos AI Studio
+- Toolkit per ottimizzare e compilare modelli AI per hardware Samsung
+- **Non è un'API runtime per sviluppatori Android standard** — è uno strumento interno/OEM
+- Nessuna API pubblica per inferenza LLM in background su S25
+
+### Pixel / Google AI Edge SDK
+- Sperimentale, disponibile solo su Pixel 9 series
+- Basato sempre su AICore → stessa restrizione foreground
+
+**Conclusione:** né Google né Samsung offrono una via ufficiale per inferenza LLM on-device in background su dispositivi consumer.
+
+---
+
+## Alternative open source: inferenza LLM senza restrizioni foreground
+
+Queste librerie girano come codice dell'app, senza passare per AICore, e **non hanno restrizioni foreground**.
+
+### Cactus ⭐ (più promettente per AWS4Tasker)
+- **Sito:** https://cactuscompute.com
+- **GitHub:** https://github.com/cactus-compute/cactus
+- Y Combinator backed; engine C++ con SDK Kotlin nativo per Android
+- Supporta **modelli vision multimodali** (LFM2-VL series) → analisi immagini ✅
+- Ottimizzato per ARM: Snapdragon, Google Tensor, Exynos, MediaTek
+- Nessuna restrizione foreground: funziona in `Service` background
+- Supporta NPU (INT4, quantizzazione)
+- API OpenAI-compatibile (Kotlin)
+- Open source
+
+**Modelli supportati:**
+| Tipo | Esempi |
+|------|--------|
+| LLM testo | Gemma 3 (270m-1b), Qwen (0.6B-1.7B), LFM (350M-8B) |
+| **Vision/Multimodale** | **LFM2-VL** (analisi immagini) ✅ |
+| Speech | Whisper, Moonshine |
+| Embedding | vari |
+
+**Prestazioni indicative (budget device Galaxy A17 5G):**
+- LFM2-350M: 87 tps prefill / 24 tps decode, ~395MB RAM
+
+### MLC LLM
+- **GitHub:** https://github.com/mlc-ai/mlc-llm
+- Engine ML con compilazione ottimizzata; SDK Kotlin + Gradle Android
+- Backend: OpenCL, Vulkan, CUDA
+- Nessuna restrizione foreground
+- Più complesso da integrare, richiede compilazione modelli
+
+### MediaPipe LLM Inference API (Google, sperimentale)
+- Già nel progetto (dipendenza MediaPipe)
+- Supporta Gemma, Phi-2, Falcon, Stable LM
+- Nessuna restrizione foreground (non usa AICore)
+- Marcato `experimental and research use only` — non consigliato per produzione
+
+### llama.cpp via NDK
+- Approccio "artigianale": compilare llama.cpp con Android NDK e chiamarlo via JNI
+- Funziona in background senza restrizioni
+- Molto flessibile (qualsiasi modello GGUF)
+- Alta complessità di integrazione e manutenzione
+
+---
+
+## Tabella comparativa completa
+
+| Soluzione | Background | Vision | S25 Ultra | Pixel | Qualità | Complessità |
+|-----------|-----------|--------|-----------|-------|---------|-------------|
+| ML Kit GenAI (AICore) | ❌ foreground only | ✅ Prompt API | ✅ | ✅ | ✅ alta (Nano) | bassa |
+| **Cactus** | ✅ | ✅ LFM2-VL | ✅ | ✅ | ⚠️ modelli piccoli | **bassa** |
+| MLC LLM | ✅ | ⚠️ parziale | ✅ | ✅ | ⚠️ | media |
+| MediaPipe LLM (exp.) | ✅ | ⚠️ | ✅ | ✅ | ⚠️ | media |
+| llama.cpp NDK | ✅ | ✅ GGUF VLM | ✅ | ✅ | ✅ | alta |
+
+---
+
+## Raccomandazione aggiornata
+
+Per AWS4Tasker, la strada più praticabile oggi per on-device background inference è **Cactus**:
+- SDK Kotlin nativo → integrazione analoga agli engine esistenti
+- Supporto vision multimodale (immagini)
+- Funziona in background senza restrizioni
+- Ottimizzato per i chipset di S25 Ultra e Pixel
+- Non richiede download/gestione modelli di sistema
+
+Il limite principale rimane la qualità inferenziale: i modelli embedded (sub-1B) sono molto meno capaci di Claude/Gemini cloud per analisi complesse. Ideale per task semplici (presenza umana, classificazione basica) con fallback cloud per analisi approfondite.
 
 ---
 
@@ -110,3 +206,9 @@ Un possibile workaround sarebbe lanciare una `Activity` temporanea che va in for
 - [Samsung Galaxy S25 multimodal Gemini Nano - Android Police](https://www.androidpolice.com/samsung-galaxy-s25-multimodal-gemini-nano/)
 - [LiteRT Universal Framework - Google Blog](https://developers.googleblog.com/litert-the-universal-framework-for-on-device-ai/)
 - [LLM Inference guide Android - Google AI Edge](https://ai.google.dev/edge/mediapipe/solutions/genai/llm_inference/android)
+- [Samsung Neural SDK - Samsung Developer](https://developer.samsung.com/neural/overview.html)
+- [Unpacking Samsung's On-Device AI SDK Strategy](https://semiconductor.samsung.com/news-events/tech-blog/unpacking-samsungs-comprehensive-on-device-ai-sdk-toolchain-strategy/)
+- [Cactus GitHub](https://github.com/cactus-compute/cactus)
+- [Cactus v1 - InfoQ](https://www.infoq.com/news/2025/12/cactus-on-device-inference/)
+- [MLC LLM Android SDK](https://llm.mlc.ai/docs/deploy/android.html)
+- [Automate Android with local LLM](https://code.mendhak.com/automate-android-with-local-llm/)
