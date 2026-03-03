@@ -15,12 +15,14 @@ import online.avogadro.opencv4tasker.app.Util
 import online.avogadro.opencv4tasker.claudeai.HumansDetectorClaudeAI
 import online.avogadro.opencv4tasker.databinding.ActivityConfigAnalyzeImageBinding
 import online.avogadro.opencv4tasker.gemini.HumansDetectorGemini
+import online.avogadro.opencv4tasker.gemma3n.HumansDetectorGemma3n
 import online.avogadro.opencv4tasker.openrouter.HumansDetectorOpenRouter
 import java.io.File
 
 const val ENGINE_ANALYZE_CLAUDEAI = "CLAUDE"
 const val ENGINE_ANALYZE_GEMINI = "GEMINI"
 const val ENGINE_ANALYZE_OPENROUTER = "OPENROUTER"
+const val ENGINE_ANALYZE_GEMMA3N = "GEMMA3N"
 
 class AnalyzeImageActionHelper(config: TaskerPluginConfig<AnalyzeImageInput>) : TaskerPluginConfigHelper<AnalyzeImageInput, AnalyzeImageOutput, AnalyzeImageActionRunner>(config) {
     override val runnerClass: Class<AnalyzeImageActionRunner> get() = AnalyzeImageActionRunner::class.java
@@ -44,20 +46,21 @@ class ActivityConfigAnalyzeImageAction : Activity(), TaskerPluginConfig<AnalyzeI
         binding.radioEngineClaudeAI.isChecked = false
         binding.radioEngineGemini.isChecked = false
         binding.radioEngineOpenRouter.isChecked = false
+        binding.radioEngineGemma3n.isChecked = false
 
         // Set the appropriate radio button based on the engine
         when (input.regular.engine) {
             ENGINE_ANALYZE_CLAUDEAI -> binding.radioEngineClaudeAI.isChecked = true
             ENGINE_ANALYZE_GEMINI -> binding.radioEngineGemini.isChecked = true
             ENGINE_ANALYZE_OPENROUTER -> binding.radioEngineOpenRouter.isChecked = true
+            ENGINE_ANALYZE_GEMMA3N -> binding.radioEngineGemma3n.isChecked = true
             else -> {
-                // Default to Claude if available
-                if (isClaudeAvailable()) {
-                    binding.radioEngineClaudeAI.isChecked = true
-                } else if (isOpenRouterAvailable()) {
-                    binding.radioEngineOpenRouter.isChecked = true
-                } else {
-                    binding.radioEngineGemini.isChecked = true
+                // Default to Claude if available, else Gemma3n, else Gemini
+                when {
+                    isClaudeAvailable() -> binding.radioEngineClaudeAI.isChecked = true
+                    isGemma3nAvailable() -> binding.radioEngineGemma3n.isChecked = true
+                    isOpenRouterAvailable() -> binding.radioEngineOpenRouter.isChecked = true
+                    else -> binding.radioEngineGemini.isChecked = true
                 }
             }
         }
@@ -66,36 +69,33 @@ class ActivityConfigAnalyzeImageAction : Activity(), TaskerPluginConfig<AnalyzeI
         if (!isClaudeAvailable()) {
             binding.radioEngineClaudeAI.isEnabled = false
             binding.radioEngineClaudeAI.isChecked = false
-            
-            // Default to Gemini if Claude was selected but now disabled
-            if (ENGINE_ANALYZE_CLAUDEAI == input.regular.engine) {
-                binding.radioEngineGemini.isChecked = true
-            }
+            if (ENGINE_ANALYZE_CLAUDEAI == input.regular.engine) binding.radioEngineGemini.isChecked = true
         }
 
         // Disable Gemini option if no API KEY is available
         if (!isGeminiAvailable()) {
             binding.radioEngineGemini.isEnabled = false
             binding.radioEngineGemini.isChecked = false
-
-            // Default to Claude if Gemini was selected but now disabled
-            if (ENGINE_ANALYZE_GEMINI == input.regular.engine) {
-                binding.radioEngineClaudeAI.isChecked = true
-            }
+            if (ENGINE_ANALYZE_GEMINI == input.regular.engine) binding.radioEngineClaudeAI.isChecked = true
         }
 
         // Disable OpenRouter option if no API KEY is available
         if (!isOpenRouterAvailable()) {
             binding.radioEngineOpenRouter.isEnabled = false
             binding.radioEngineOpenRouter.isChecked = false
-
-            // Default to Claude if OpenRouter was selected but now disabled
             if (ENGINE_ANALYZE_OPENROUTER == input.regular.engine) {
-                if (isClaudeAvailable()) {
-                    binding.radioEngineClaudeAI.isChecked = true
-                } else {
-                    binding.radioEngineGemini.isChecked = true
-                }
+                if (isClaudeAvailable()) binding.radioEngineClaudeAI.isChecked = true
+                else binding.radioEngineGemini.isChecked = true
+            }
+        }
+
+        // Disable Gemma 3n if model file is not configured or not found
+        if (!isGemma3nAvailable()) {
+            binding.radioEngineGemma3n.isEnabled = false
+            binding.radioEngineGemma3n.isChecked = false
+            if (ENGINE_ANALYZE_GEMMA3N == input.regular.engine) {
+                if (isClaudeAvailable()) binding.radioEngineClaudeAI.isChecked = true
+                else binding.radioEngineGemini.isChecked = true
             }
         }
     }
@@ -115,11 +115,17 @@ class ActivityConfigAnalyzeImageAction : Activity(), TaskerPluginConfig<AnalyzeI
         return openRouterApiKey.isNotEmpty()
     }
 
+    private fun isGemma3nAvailable(): Boolean {
+        val path = SharedPreferencesHelper.get(this, SharedPreferencesHelper.GEMMA3N_MODEL_PATH)
+        return path.isNotEmpty() && File(path).exists()
+    }
+
     override val inputForTasker: TaskerInput<AnalyzeImageInput> get() {
         val engine = when {
             binding.radioEngineClaudeAI.isChecked -> ENGINE_ANALYZE_CLAUDEAI
             binding.radioEngineGemini.isChecked -> ENGINE_ANALYZE_GEMINI
             binding.radioEngineOpenRouter.isChecked -> ENGINE_ANALYZE_OPENROUTER
+            binding.radioEngineGemma3n.isChecked -> ENGINE_ANALYZE_GEMMA3N
             else -> ENGINE_ANALYZE_CLAUDEAI // Default to Claude
         }
         
@@ -197,6 +203,18 @@ class AnalyzeImageActionRunner : TaskerPluginRunnerAction<AnalyzeImageInput, Ana
                     )
                     if (response.isEmpty()) {
                         error = openRouter.getLastError()
+                    }
+                }
+                ENGINE_ANALYZE_GEMMA3N -> {
+                    val gemma3n = HumansDetectorGemma3n()
+                    gemma3n.setup(context)
+                    response = gemma3n.analyzeImage(
+                        input.regular.systemPrompt ?: "",
+                        input.regular.userPrompt,
+                        newPath
+                    )
+                    if (response.isEmpty()) {
+                        error = gemma3n.getLastError()
                     }
                 }
                 else -> {

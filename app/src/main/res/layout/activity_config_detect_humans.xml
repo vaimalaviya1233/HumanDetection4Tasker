@@ -53,6 +53,12 @@
             android:layout_height="wrap_content"
             android:checked="true"
             android:text="@string/engine_tensorflow" />
+
+        <RadioButton
+            android:id="@+id/radioEngineGemma3n"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/engine_gemma3n" />
     </RadioGroup>
 
     <Button

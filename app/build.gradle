@@ -88,5 +88,8 @@ dependencies {
     // Tasker plugin
     implementation 'com.joaomgcd:taskerpluginlibrary:0.4.10'
 
+    // LiteRT-LM: on-device LLM inference (for Gemma 3n local engine)
+    implementation 'com.google.ai.edge.litertlm:litertlm-android:0.8.1'
+
 
 }

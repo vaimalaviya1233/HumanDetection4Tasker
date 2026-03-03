@@ -21,6 +21,7 @@
     <string name="engine_gemini">Gemini (online)</string>
     <string name="engine_openrouter">OpenRouter (online)</string>
     <string name="engine_tensorflow">Tensorflow Lite (local device)</string>
+    <string name="engine_gemma3n">Gemma 3n (locale, richiede modello)</string>
 
     <!-- Model selection labels -->
     <string name="model_custom">Custom…</string>

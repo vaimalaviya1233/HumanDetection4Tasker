@@ -4,8 +4,10 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import java.io.File;
@@ -73,6 +75,36 @@ public class Util {
      * @param path
      * @return
      */
+    /**
+     * Tries to resolve the actual filesystem path from a content URI without copying the file.
+     * Suitable for large files (e.g. ML models). Returns null if the path cannot be determined.
+     */
+    public static String getModelPathFromUri(Context context, Uri uri) {
+        if ("file".equals(uri.getScheme())) {
+            return uri.getPath();
+        }
+        if ("content".equals(uri.getScheme())) {
+            try {
+                String[] projection = { MediaStore.MediaColumns.DATA };
+                Cursor cursor = context.getContentResolver().query(uri, projection, null, null, null);
+                if (cursor != null) {
+                    try {
+                        if (cursor.moveToFirst()) {
+                            int col = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+                            String path = cursor.getString(col);
+                            if (path != null && !path.isEmpty()) return path;
+                        }
+                    } finally {
+                        cursor.close();
+                    }
+                }
+            } catch (Exception e) {
+                Log.w(TAG, "MediaStore path resolution failed: " + e.getMessage());
+            }
+        }
+        return null;
+    }
+
     public static String contentToFile(Context context, String path) throws IOException {
         if (path.startsWith("file:")) {
             return path;
