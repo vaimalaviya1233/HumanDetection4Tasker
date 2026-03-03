@@ -22,6 +22,22 @@ android {
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
         }
+
+        externalNativeBuild {
+            cmake {
+                cppFlags '-std=c++17'
+                arguments '-DANDROID_STL=c++_shared'
+                // Build llama.cpp only for arm64 (NEON optimized)
+                abiFilters 'arm64-v8a'
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path 'src/main/cpp/CMakeLists.txt'
+            version '3.22.1'
+        }
     }
     buildTypes {
         release {
@@ -89,7 +105,7 @@ dependencies {
     implementation 'com.joaomgcd:taskerpluginlibrary:0.4.10'
 
     // LiteRT-LM: on-device LLM inference (for Gemma 3n local engine)
-    implementation 'com.google.ai.edge.litertlm:litertlm-android:0.8.1'
+    implementation 'com.google.ai.edge.litertlm:litertlm-android:0.8.0'
 
 
 }

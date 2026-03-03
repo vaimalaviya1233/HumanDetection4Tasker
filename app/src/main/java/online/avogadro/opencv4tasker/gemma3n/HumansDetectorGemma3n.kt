@@ -4,10 +4,10 @@ import android.content.Context
 import android.util.Log
 import com.google.ai.edge.litertlm.Backend
 import com.google.ai.edge.litertlm.Content
-import com.google.ai.edge.litertlm.Contents
 import com.google.ai.edge.litertlm.ConversationConfig
 import com.google.ai.edge.litertlm.Engine
 import com.google.ai.edge.litertlm.EngineConfig
+import com.google.ai.edge.litertlm.Message
 import online.avogadro.opencv4tasker.ai.AIImageAnalyzer
 import online.avogadro.opencv4tasker.app.SharedPreferencesHelper
 import online.avogadro.opencv4tasker.app.Util
@@ -71,14 +71,14 @@ class HumansDetectorGemma3n : AIImageAnalyzer {
         lastError = null
         try {
             val engine = getOrCreateEngine()
-            val config = ConversationConfig(systemInstruction = Contents.of(systemPrompt))
-            val contents = if (!userPrompt.isNullOrEmpty()) {
-                Contents.of(Content.ImageFile(imagePath), Content.Text(userPrompt))
+            val config = ConversationConfig(systemMessage = Message.of(systemPrompt))
+            val userMessage = if (!userPrompt.isNullOrEmpty()) {
+                Message.of(Content.ImageFile(imagePath), Content.Text(userPrompt))
             } else {
-                Contents.of(Content.ImageFile(imagePath))
+                Message.of(Content.ImageFile(imagePath))
             }
             engine.createConversation(config).use { conversation ->
-                val response = conversation.sendMessage(contents).toString()
+                val response = conversation.sendMessage(userMessage).toString()
                 lastResponse = response
                 return response
             }

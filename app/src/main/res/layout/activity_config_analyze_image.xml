@@ -58,6 +58,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/engine_gemma3n" />
+
+            <RadioButton
+                android:id="@+id/radioEngineLlamaCpp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/engine_llamacpp" />
         </RadioGroup>
 
         <TextView

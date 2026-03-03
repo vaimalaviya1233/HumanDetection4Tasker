@@ -7,18 +7,29 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import online.avogadro.opencv4tasker.app.SharedPreferencesHelper;
 import online.avogadro.opencv4tasker.app.Util;
+import online.avogadro.opencv4tasker.llamacpp.GgufModelInfo;
+import online.avogadro.opencv4tasker.llamacpp.LlamaCppModelCatalog;
+import online.avogadro.opencv4tasker.llamacpp.LlamaCppModelDownloader;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ConfigActivity extends AppCompatActivity {
 
     private static final String TAG = "ConfigActivity";
     private static final int REQUEST_PICK_GEMMA_MODEL = 2001;
+    private static final int REQUEST_PICK_LLAMACPP_MODEL = 2002;
+    private static final int REQUEST_PICK_LLAMACPP_MMPROJ = 2003;
     private static final String GEMMA3N_HUGGINGFACE_URL =
             "https://huggingface.co/google/gemma-3n-E2B-it-litert-lm/resolve/main/gemma-3n-E2B-it-int4.litertlm";
 
@@ -50,6 +61,15 @@ public class ConfigActivity extends AppCompatActivity {
     EditText openRouterModel;
 
     TextView gemma3nModelPathLabel;
+
+    Spinner llamacppModelSpinner;
+    TextView llamacppStatusLabel;
+    ProgressBar llamacppProgressBar;
+    LinearLayout llamacppCatalogButtons;
+    LinearLayout llamacppCustomSection;
+    TextView llamacppModelPathLabel;
+    TextView llamacppMmprojPathLabel;
+    private volatile boolean llamacppDownloading = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -176,6 +196,115 @@ public class ConfigActivity extends AppCompatActivity {
             startActivityForResult(intent, REQUEST_PICK_GEMMA_MODEL);
         });
 
+        // --- llama.cpp / GGUF ---
+        llamacppModelSpinner = findViewById(R.id.llamacppModelSpinner);
+        llamacppStatusLabel = findViewById(R.id.llamacppStatusLabel);
+        llamacppProgressBar = findViewById(R.id.llamacppProgressBar);
+        llamacppCatalogButtons = findViewById(R.id.llamacppCatalogButtons);
+        llamacppCustomSection = findViewById(R.id.llamacppCustomSection);
+        llamacppModelPathLabel = findViewById(R.id.llamacppModelPathLabel);
+        llamacppMmprojPathLabel = findViewById(R.id.llamacppMmprojPathLabel);
+
+        List<GgufModelInfo> catalogModels = LlamaCppModelCatalog.INSTANCE.getMODELS();
+        List<String> llamacppNames = new ArrayList<>();
+        for (GgufModelInfo m : catalogModels) {
+            llamacppNames.add(m.getDisplayName());
+        }
+        llamacppNames.add("Personalizzato…");
+
+        ArrayAdapter<String> llamacppAdapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_spinner_item, llamacppNames);
+        llamacppAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        llamacppModelSpinner.setAdapter(llamacppAdapter);
+
+        // Restore saved selection
+        String savedSelectedModel = SharedPreferencesHelper.get(this, SharedPreferencesHelper.LLAMACPP_SELECTED_MODEL);
+        int savedIdx = -1;
+        if (savedSelectedModel != null && !savedSelectedModel.isEmpty()) {
+            try { savedIdx = Integer.parseInt(savedSelectedModel); } catch (NumberFormatException ignored) {}
+        }
+        if (savedIdx >= 0 && savedIdx < catalogModels.size()) {
+            llamacppModelSpinner.setSelection(savedIdx);
+        } else if (savedIdx == catalogModels.size()) {
+            // Custom
+            llamacppModelSpinner.setSelection(catalogModels.size());
+        } else {
+            llamacppModelSpinner.setSelection(0);
+        }
+
+        llamacppModelSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                boolean isCustom = position == catalogModels.size();
+                llamacppCustomSection.setVisibility(isCustom ? View.VISIBLE : View.GONE);
+                llamacppCatalogButtons.setVisibility(isCustom ? View.GONE : View.VISIBLE);
+                if (!isCustom) {
+                    updateLlamacppCatalogStatus(catalogModels.get(position));
+                }
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+        // Update custom path labels
+        String savedLlamacppModelPath = SharedPreferencesHelper.get(this, SharedPreferencesHelper.LLAMACPP_MODEL_PATH);
+        String savedLlamacppMmprojPath = SharedPreferencesHelper.get(this, SharedPreferencesHelper.LLAMACPP_MMPROJ_PATH);
+        updateLlamacppPathLabel(llamacppModelPathLabel, "Path modello", savedLlamacppModelPath);
+        updateLlamacppPathLabel(llamacppMmprojPathLabel, "Path mmproj", savedLlamacppMmprojPath);
+
+        findViewById(R.id.buttonLlamacppDownload).setOnClickListener(v -> {
+            int pos = llamacppModelSpinner.getSelectedItemPosition();
+            if (pos >= catalogModels.size() || llamacppDownloading) return;
+            GgufModelInfo modelInfo = catalogModels.get(pos);
+            llamacppDownloading = true;
+            llamacppProgressBar.setVisibility(View.VISIBLE);
+            llamacppProgressBar.setProgress(0);
+            llamacppStatusLabel.setText("Download in corso… 0%");
+            ((Button) v).setEnabled(false);
+
+            new Thread(() -> {
+                boolean success = LlamaCppModelDownloader.INSTANCE.downloadModel(this, modelInfo,
+                        progress -> {
+                            runOnUiThread(() -> {
+                                llamacppProgressBar.setProgress(progress);
+                                llamacppStatusLabel.setText("Download in corso… " + progress + "%");
+                            });
+                            return kotlin.Unit.INSTANCE;
+                        });
+                runOnUiThread(() -> {
+                    llamacppDownloading = false;
+                    llamacppProgressBar.setVisibility(View.GONE);
+                    ((Button) v).setEnabled(true);
+                    if (success) {
+                        llamacppStatusLabel.setText("Scaricato");
+                    } else {
+                        llamacppStatusLabel.setText("Download fallito. Verifica spazio disponibile.");
+                    }
+                });
+            }).start();
+        });
+
+        findViewById(R.id.buttonLlamacppDelete).setOnClickListener(v -> {
+            int pos = llamacppModelSpinner.getSelectedItemPosition();
+            if (pos >= catalogModels.size()) return;
+            GgufModelInfo modelInfo = catalogModels.get(pos);
+            LlamaCppModelDownloader.INSTANCE.deleteModel(this, modelInfo);
+            updateLlamacppCatalogStatus(modelInfo);
+        });
+
+        findViewById(R.id.buttonLlamacppSelectModel).setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("*/*");
+            startActivityForResult(intent, REQUEST_PICK_LLAMACPP_MODEL);
+        });
+
+        findViewById(R.id.buttonLlamacppSelectMmproj).setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("*/*");
+            startActivityForResult(intent, REQUEST_PICK_LLAMACPP_MMPROJ);
+        });
+
         // --- Save button ---
         findViewById(R.id.buttonSave).setOnClickListener(v -> {
             SharedPreferencesHelper.save(this, SharedPreferencesHelper.CLAUDE_API_KEY,
@@ -201,6 +330,23 @@ public class ConfigActivity extends AppCompatActivity {
             SharedPreferencesHelper.save(this, SharedPreferencesHelper.OPENROUTER_MODEL,
                     openRouterModel.getText().toString());
 
+            // Save llama.cpp selected model index
+            int llamacppSel = llamacppModelSpinner.getSelectedItemPosition();
+            SharedPreferencesHelper.save(this, SharedPreferencesHelper.LLAMACPP_SELECTED_MODEL,
+                    String.valueOf(llamacppSel));
+
+            // If a catalog model is selected and downloaded, set paths automatically
+            List<GgufModelInfo> models = LlamaCppModelCatalog.INSTANCE.getMODELS();
+            if (llamacppSel < models.size()) {
+                GgufModelInfo selected = models.get(llamacppSel);
+                if (LlamaCppModelDownloader.INSTANCE.isModelDownloaded(this, selected)) {
+                    SharedPreferencesHelper.save(this, SharedPreferencesHelper.LLAMACPP_MODEL_PATH,
+                            LlamaCppModelDownloader.INSTANCE.getModelPath(this, selected));
+                    SharedPreferencesHelper.save(this, SharedPreferencesHelper.LLAMACPP_MMPROJ_PATH,
+                            LlamaCppModelDownloader.INSTANCE.getMmprojPath(this, selected));
+                }
+            }
+
             finish();
         });
     }
@@ -208,28 +354,31 @@ public class ConfigActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_PICK_GEMMA_MODEL && resultCode == RESULT_OK && data != null) {
-            Uri uri = data.getData();
-            if (uri != null) {
-                // Take persistent permission so we can read the file later
-                try {
-                    getContentResolver().takePersistableUriPermission(
-                            uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                } catch (Exception ignored) { }
+        if (resultCode != RESULT_OK || data == null) return;
+        Uri uri = data.getData();
+        if (uri == null) return;
 
-                // Try to resolve the actual file path (needed by LiteRT-LM Engine)
-                String resolvedPath = Util.getModelPathFromUri(this, uri);
-                if (resolvedPath != null) {
-                    SharedPreferencesHelper.save(this, SharedPreferencesHelper.GEMMA3N_MODEL_PATH, resolvedPath);
-                    updateGemma3nPathLabel(resolvedPath);
-                } else {
-                    // Fallback: store the URI string and inform the user
-                    String uriStr = uri.toString();
-                    SharedPreferencesHelper.save(this, SharedPreferencesHelper.GEMMA3N_MODEL_PATH, uriStr);
-                    updateGemma3nPathLabel(uriStr);
-                    gemma3nModelPathLabel.setText("URI: " + uriStr + "\n(Attenzione: impossibile risolvere il path. Inserisci il path assoluto manualmente se necessario.)");
-                }
+        // Take persistent permission
+        try {
+            getContentResolver().takePersistableUriPermission(
+                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        } catch (Exception ignored) { }
+
+        String resolvedPath = Util.getModelPathFromUri(this, uri);
+        String pathOrUri = resolvedPath != null ? resolvedPath : uri.toString();
+
+        if (requestCode == REQUEST_PICK_GEMMA_MODEL) {
+            SharedPreferencesHelper.save(this, SharedPreferencesHelper.GEMMA3N_MODEL_PATH, pathOrUri);
+            updateGemma3nPathLabel(pathOrUri);
+            if (resolvedPath == null) {
+                gemma3nModelPathLabel.setText("URI: " + pathOrUri + "\n(Attenzione: impossibile risolvere il path. Inserisci il path assoluto manualmente se necessario.)");
             }
+        } else if (requestCode == REQUEST_PICK_LLAMACPP_MODEL) {
+            SharedPreferencesHelper.save(this, SharedPreferencesHelper.LLAMACPP_MODEL_PATH, pathOrUri);
+            updateLlamacppPathLabel(llamacppModelPathLabel, "Path modello", pathOrUri);
+        } else if (requestCode == REQUEST_PICK_LLAMACPP_MMPROJ) {
+            SharedPreferencesHelper.save(this, SharedPreferencesHelper.LLAMACPP_MMPROJ_PATH, pathOrUri);
+            updateLlamacppPathLabel(llamacppMmprojPathLabel, "Path mmproj", pathOrUri);
         }
     }
 
@@ -248,6 +397,19 @@ public class ConfigActivity extends AppCompatActivity {
             if (modelIds[i].equals(modelId)) return i;
         }
         return -1;
+    }
+
+    private void updateLlamacppCatalogStatus(GgufModelInfo modelInfo) {
+        boolean downloaded = LlamaCppModelDownloader.INSTANCE.isModelDownloaded(this, modelInfo);
+        llamacppStatusLabel.setText(downloaded ? "Scaricato" : "Non scaricato (" + modelInfo.getTotalSizeMB() + " MB)");
+    }
+
+    private void updateLlamacppPathLabel(TextView label, String prefix, String path) {
+        if (path == null || path.isEmpty()) {
+            label.setText(prefix + ": (non configurato)");
+        } else {
+            label.setText(prefix + ": " + path);
+        }
     }
 
     @Override

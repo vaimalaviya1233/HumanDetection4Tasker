@@ -8,6 +8,8 @@ AWS4Tasker (formerly OpenCV4Tasker) is an Android plugin for Tasker and MacroDro
 
 ## Build Commands
 
+If a `LOCAL_BUILD.md` file exists in the project root, follow the instructions there for building (e.g. cross-environment setups like WSL2 + Windows). Otherwise, use the standard Gradle commands:
+
 ```bash
 # Build the project
 ./gradlew build
