@@ -21,9 +21,8 @@
     <string name="engine_gemini">Gemini (online)</string>
     <string name="engine_openrouter">OpenRouter (online)</string>
     <string name="engine_tensorflow">Tensorflow Lite (local device)</string>
-    <string name="engine_gemma3n">Gemma 3n (locale, richiede modello)</string>
-    <string name="engine_llamacpp">llama.cpp / GGUF (locale)</string>
-
+    <string name="engine_gemma3n">Gemma 3n (local device)</string>
+    <string name="engine_gemma3n_disabled">Gemma 3n (local device) [enable in settings]</string>
     <!-- Model selection labels -->
     <string name="model_custom">Custom…</string>
     <string name="custom_model_hint_claude">e.g. claude-sonnet-4-6</string>
@@ -38,6 +37,7 @@
     <!-- Gemini model display names -->
     <string name="gemini_model_25_flash">2.5 Flash</string>
     <string name="gemini_model_25_pro">2.5 Pro</string>
+    <string name="gemini_model_30_flash_preview">3.0 Flash Preview</string>
     <string name="gemini_model_30_pro_preview">3.0 Pro Preview</string>
     <string name="gemini_model_31_pro_preview">3.1 Pro Preview</string>
 </resources>

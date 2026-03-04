@@ -16,8 +16,6 @@ import online.avogadro.opencv4tasker.claudeai.HumansDetectorClaudeAI
 import online.avogadro.opencv4tasker.databinding.ActivityConfigAnalyzeImageBinding
 import online.avogadro.opencv4tasker.gemini.HumansDetectorGemini
 import online.avogadro.opencv4tasker.gemma3n.HumansDetectorGemma3n
-import online.avogadro.opencv4tasker.llamacpp.HumansDetectorLlamaCpp
-import online.avogadro.opencv4tasker.llamacpp.LlamaCppEngine
 import online.avogadro.opencv4tasker.openrouter.HumansDetectorOpenRouter
 import java.io.File
 
@@ -25,7 +23,6 @@ const val ENGINE_ANALYZE_CLAUDEAI = "CLAUDE"
 const val ENGINE_ANALYZE_GEMINI = "GEMINI"
 const val ENGINE_ANALYZE_OPENROUTER = "OPENROUTER"
 const val ENGINE_ANALYZE_GEMMA3N = "GEMMA3N"
-const val ENGINE_ANALYZE_LLAMACPP = "LLAMACPP"
 
 class AnalyzeImageActionHelper(config: TaskerPluginConfig<AnalyzeImageInput>) : TaskerPluginConfigHelper<AnalyzeImageInput, AnalyzeImageOutput, AnalyzeImageActionRunner>(config) {
     override val runnerClass: Class<AnalyzeImageActionRunner> get() = AnalyzeImageActionRunner::class.java
@@ -50,7 +47,6 @@ class ActivityConfigAnalyzeImageAction : Activity(), TaskerPluginConfig<AnalyzeI
         binding.radioEngineGemini.isChecked = false
         binding.radioEngineOpenRouter.isChecked = false
         binding.radioEngineGemma3n.isChecked = false
-        binding.radioEngineLlamaCpp.isChecked = false
 
         // Set the appropriate radio button based on the engine
         when (input.regular.engine) {
@@ -58,7 +54,6 @@ class ActivityConfigAnalyzeImageAction : Activity(), TaskerPluginConfig<AnalyzeI
             ENGINE_ANALYZE_GEMINI -> binding.radioEngineGemini.isChecked = true
             ENGINE_ANALYZE_OPENROUTER -> binding.radioEngineOpenRouter.isChecked = true
             ENGINE_ANALYZE_GEMMA3N -> binding.radioEngineGemma3n.isChecked = true
-            ENGINE_ANALYZE_LLAMACPP -> binding.radioEngineLlamaCpp.isChecked = true
             else -> {
                 // Default to Claude if available, else Gemma3n, else Gemini
                 when {
@@ -104,15 +99,6 @@ class ActivityConfigAnalyzeImageAction : Activity(), TaskerPluginConfig<AnalyzeI
             }
         }
 
-        // Disable llama.cpp if native lib not available or model files not configured
-        if (!isLlamaCppAvailable()) {
-            binding.radioEngineLlamaCpp.isEnabled = false
-            binding.radioEngineLlamaCpp.isChecked = false
-            if (ENGINE_ANALYZE_LLAMACPP == input.regular.engine) {
-                if (isClaudeAvailable()) binding.radioEngineClaudeAI.isChecked = true
-                else binding.radioEngineGemini.isChecked = true
-            }
-        }
     }
 
     private fun isClaudeAvailable(): Boolean {
@@ -132,15 +118,7 @@ class ActivityConfigAnalyzeImageAction : Activity(), TaskerPluginConfig<AnalyzeI
 
     private fun isGemma3nAvailable(): Boolean {
         val path = SharedPreferencesHelper.get(this, SharedPreferencesHelper.GEMMA3N_MODEL_PATH)
-        return path.isNotEmpty() && File(path).exists()
-    }
-
-    private fun isLlamaCppAvailable(): Boolean {
-        if (!LlamaCppEngine.isNativeAvailable) return false
-        val modelPath = SharedPreferencesHelper.get(this, SharedPreferencesHelper.LLAMACPP_MODEL_PATH)
-        val mmprojPath = SharedPreferencesHelper.get(this, SharedPreferencesHelper.LLAMACPP_MMPROJ_PATH)
-        return modelPath.isNotEmpty() && File(modelPath).exists()
-                && mmprojPath.isNotEmpty() && File(mmprojPath).exists()
+        return Util.isModelFileAccessible(path)
     }
 
     override val inputForTasker: TaskerInput<AnalyzeImageInput> get() {
@@ -149,7 +127,6 @@ class ActivityConfigAnalyzeImageAction : Activity(), TaskerPluginConfig<AnalyzeI
             binding.radioEngineGemini.isChecked -> ENGINE_ANALYZE_GEMINI
             binding.radioEngineOpenRouter.isChecked -> ENGINE_ANALYZE_OPENROUTER
             binding.radioEngineGemma3n.isChecked -> ENGINE_ANALYZE_GEMMA3N
-            binding.radioEngineLlamaCpp.isChecked -> ENGINE_ANALYZE_LLAMACPP
             else -> ENGINE_ANALYZE_CLAUDEAI // Default to Claude
         }
         
@@ -239,18 +216,6 @@ class AnalyzeImageActionRunner : TaskerPluginRunnerAction<AnalyzeImageInput, Ana
                     )
                     if (response.isEmpty()) {
                         error = gemma3n.getLastError()
-                    }
-                }
-                ENGINE_ANALYZE_LLAMACPP -> {
-                    val llamacpp = HumansDetectorLlamaCpp()
-                    llamacpp.setup(context)
-                    response = llamacpp.analyzeImage(
-                        input.regular.systemPrompt ?: "",
-                        input.regular.userPrompt,
-                        newPath
-                    )
-                    if (response.isEmpty()) {
-                        error = llamacpp.getLastError()
                     }
                 }
                 else -> {
