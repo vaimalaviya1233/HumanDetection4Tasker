@@ -2,6 +2,10 @@ Plugin app for Tasker and MacroDroid to provide Humans Detection
 
 Licensed under GPL v3
 
+V 1.8.0:
+* FIXED: Gemini deprecated model ID migration (gemini-3-pro-preview → gemini-3.1-pro-preview)
+* CHANGED: removed x86/x86_64 ABI filters, reducing APK size (no Android devices use x86 since 2018)
+
 V 1.7.0:
 * CHANGED: updated to using Claude Sonnet 4.6
 * CHANGED: local detection engine migrated from TensorFlow Lite to MediaPipe Tasks Vision (same model, better 16KB ELF alignment)
@@ -63,7 +67,7 @@ Limitations:
 Ideas for future improvements:
 * [DONE] ~~Support for PNG with Claude/Gemini~~
 * [DONE] ~~Support for Openrouter.ai~~
-* support for running locally Google Gemma 3n
+* [WIP] support for running locally Google Gemma 3n (code present but disabled — crashes at runtime, needs investigation)
 * [DISCARDED] ~~Support for ChatGPT-Vision~~ (superseded by OpenRouter allowing the use of ChatGPT Vision!)
 * [DONE] ~~Support for generic Claude/ChatGPT actions~~
 
