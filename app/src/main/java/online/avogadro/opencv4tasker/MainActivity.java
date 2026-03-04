@@ -2,8 +2,10 @@ package online.avogadro.opencv4tasker;
 
 import androidx.appcompat.app.AppCompatActivity;
 import online.avogadro.opencv4tasker.app.SharedPreferencesHelper;
+import online.avogadro.opencv4tasker.app.Util;
 import online.avogadro.opencv4tasker.claudeai.HumansDetectorClaudeAI;
 import online.avogadro.opencv4tasker.gemini.HumansDetectorGemini;
+import online.avogadro.opencv4tasker.gemma3n.HumansDetectorGemma3n;
 import online.avogadro.opencv4tasker.openrouter.HumansDetectorOpenRouter;
 import online.avogadro.opencv4tasker.tensorflowlite.HumansDetectorTensorFlow;
 
@@ -37,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     static final String ENGINE_TENSORFLOW = "TENSORFLOW";
     static final String ENGINE_GEMINI = "GEMINI";
     static final String ENGINE_OPENROUTER = "OPENROUTER";
+    static final String ENGINE_GEMMA3N = "GEMMA3N";
 
     EditText testImagePath;
 
@@ -77,6 +80,13 @@ public class MainActivity extends AppCompatActivity {
         boolean hasOpenRouterKey = !"".equals(SharedPreferencesHelper.get(this, SharedPreferencesHelper.OPENROUTER_API_KEY));
         openRouterButton.setEnabled(hasOpenRouterKey);
         
+        // Gemma 3n: temporarily disabled (crashes at runtime, needs investigation)
+        // RadioButton gemma3nButton = findViewById(R.id.radioEngineGemma3n);
+        // String gemma3nPath = SharedPreferencesHelper.get(this, SharedPreferencesHelper.GEMMA3N_MODEL_PATH);
+        // boolean hasGemma3n = Util.isModelFileAccessible(gemma3nPath);
+        // gemma3nButton.setEnabled(hasGemma3n);
+        // gemma3nButton.setText(hasGemma3n ? R.string.engine_gemma3n : R.string.engine_gemma3n_disabled);
+
         // Show/hide warning message if API keys are missing
         TextView warningTextView = findViewById(R.id.warningTextView);
         if (!hasClaudeKey || !hasGeminiKey || !hasOpenRouterKey) {
@@ -84,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             warningTextView.setVisibility(View.GONE);
         }
-        
+
         // Set click listener for warning message to open instructions URL
         warningTextView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -101,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         testImagePath = findViewById(R.id.testImagePath);
-        
+
         // Restore the last selected image path from SharedPreferences
         String lastImagePath = SharedPreferencesHelper.get(this, SharedPreferencesHelper.LAST_IMAGE_PATH);
         if (lastImagePath != null && !lastImagePath.isEmpty()) {
@@ -112,17 +122,24 @@ public class MainActivity extends AppCompatActivity {
         RadioButton claudeButton = findViewById(R.id.radioEngineClaudeAI);
         boolean hasClaudeKey = !"".equals(SharedPreferencesHelper.get(this, SharedPreferencesHelper.CLAUDE_API_KEY));
         claudeButton.setEnabled(hasClaudeKey);
-            
+
         // Check Gemini API key and enable/disable Gemini option
         RadioButton geminiButton = findViewById(R.id.radioEngineGemini);
         boolean hasGeminiKey = !"".equals(SharedPreferencesHelper.get(this, SharedPreferencesHelper.GEMINI_API_KEY));
         geminiButton.setEnabled(hasGeminiKey);
-        
+
         // Check OpenRouter API key and enable/disable OpenRouter option
         RadioButton openRouterButton = findViewById(R.id.radioEngineOpenRouter);
         boolean hasOpenRouterKey = !"".equals(SharedPreferencesHelper.get(this, SharedPreferencesHelper.OPENROUTER_API_KEY));
         openRouterButton.setEnabled(hasOpenRouterKey);
-        
+
+        // Gemma 3n: temporarily disabled (crashes at runtime, needs investigation)
+        // RadioButton gemma3nButton = findViewById(R.id.radioEngineGemma3n);
+        // String gemma3nPath = SharedPreferencesHelper.get(this, SharedPreferencesHelper.GEMMA3N_MODEL_PATH);
+        // boolean hasGemma3n = Util.isModelFileAccessible(gemma3nPath);
+        // gemma3nButton.setEnabled(hasGemma3n);
+        // gemma3nButton.setText(hasGemma3n ? R.string.engine_gemma3n : R.string.engine_gemma3n_disabled);
+
         // Show/hide warning message if API keys are missing
         TextView warningTextView = findViewById(R.id.warningTextView);
         if (!hasClaudeKey || !hasGeminiKey || !hasOpenRouterKey) {
@@ -130,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             warningTextView.setVisibility(View.GONE);
         }
-        
+
         // Set click listener for warning message to open instructions URL
         warningTextView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -195,6 +212,7 @@ public class MainActivity extends AppCompatActivity {
         RadioButton radioGemini = (RadioButton)findViewById(R.id.radioEngineGemini);
         RadioButton radioClaude = (RadioButton)findViewById(R.id.radioEngineClaudeAI);
         RadioButton radioOpenRouter = (RadioButton)findViewById(R.id.radioEngineOpenRouter);
+        RadioButton radioGemma3n = (RadioButton)findViewById(R.id.radioEngineGemma3n);
 
         int detectionScore = -99;
         if (radioTensorflow.isChecked()) {
@@ -203,6 +221,8 @@ public class MainActivity extends AppCompatActivity {
             engine = ENGINE_GEMINI;
         } else if (radioOpenRouter.isChecked()) {
             engine = ENGINE_OPENROUTER;
+        } else if (radioGemma3n.isChecked()) {
+            engine = ENGINE_GEMMA3N;
         } else {
             engine = ENGINE_CLAUDE_AI;
         }
@@ -270,6 +290,27 @@ public class MainActivity extends AppCompatActivity {
                             // UI Thread work here
                             if (result!=-1)
                                 resultTextView.setText("Detection score: "+result+" "+ENGINE_OPENROUTER+"\n"+h.getLastResponse());
+                            else
+                                resultTextView.setText("Detection failure: "+h.getLastError());
+                        });
+                    } catch (IOException e) {
+                        handler.post(() -> {
+                            resultTextView.setText("Detection error: " + e.getMessage());
+                        });
+                    }
+                });
+            } else if (engine==ENGINE_GEMMA3N) {
+                ExecutorService executor = Executors.newSingleThreadExecutor();
+                Handler handler = new Handler(Looper.getMainLooper());
+                executor.execute(() -> {
+                    try {
+                        HumansDetectorGemma3n h = new HumansDetectorGemma3n();
+                        h.setup(this);
+                        int result = h.detectPerson(this, imageUri);
+
+                        handler.post(() -> {
+                            if (result!=-1)
+                                resultTextView.setText("Detection score: "+result+" "+ENGINE_GEMMA3N+"\n"+h.getLastResponse());
                             else
                                 resultTextView.setText("Detection failure: "+h.getLastError());
                         });

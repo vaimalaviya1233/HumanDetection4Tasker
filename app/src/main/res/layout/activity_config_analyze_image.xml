@@ -52,6 +52,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/engine_openrouter" />
+
+            <!-- Gemma 3n: temporarily disabled (crashes at runtime, needs investigation) -->
+            <RadioButton
+                android:id="@+id/radioEngineGemma3n"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/engine_gemma3n"
+                android:visibility="gone" />
+
         </RadioGroup>
 
         <TextView

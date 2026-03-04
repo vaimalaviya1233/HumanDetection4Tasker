@@ -4,9 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AWS4Tasker (formerly OpenCV4Tasker) is an Android plugin for Tasker and MacroDroid that provides AI-powered image analysis capabilities. The app can detect humans in images and perform general-purpose image analysis using multiple AI engines including Claude AI, Google Gemini, OpenRouter, and MediaPipe (local).
+AWS4Tasker (formerly OpenCV4Tasker) is an Android plugin for Tasker and MacroDroid that provides AI-powered image analysis capabilities. The app can detect humans in images and perform general-purpose image analysis using multiple AI engines including Claude AI, Google Gemini, OpenRouter, MediaPipe (local), and Gemma 3n (local, currently disabled).
 
 ## Build Commands
+
+If a `LOCAL_BUILD.md` file exists in the project root, follow the instructions there for building (e.g. cross-environment setups like WSL2 + Windows). Otherwise, use the standard Gradle commands:
 
 ```bash
 # Build the project
@@ -40,6 +42,7 @@ AWS4Tasker (formerly OpenCV4Tasker) is an Android plugin for Tasker and MacroDro
   - `HumansDetectorGemini` - Google Gemini integration (default model: `gemini-2.5-flash`)
   - `HumansDetectorOpenRouter` - OpenRouter integration (user-configurable model)
   - `HumansDetectorTensorFlow` - Local processing via MediaPipe Tasks Vision (class name kept for backward compatibility)
+  - `HumansDetectorGemma3n` - Local on-device VLM via LiteRT-LM (**temporarily disabled** — crashes at runtime, UI hidden with `visibility="gone"`)
   - `AIImageAnalyzer` - Common interface for AI-based image analysis
 
 ### Tasker Plugin System
@@ -68,6 +71,7 @@ The notification interception system includes:
 
 - Tasker Plugin Library: `com.joaomgcd:taskerpluginlibrary:0.4.10`
 - MediaPipe Tasks Vision: `com.google.mediapipe:tasks-vision:0.10.21` (local object detection, replaces TensorFlow Lite)
+- LiteRT-LM: `com.google.ai.edge.litertlm:litertlm-android:0.8.0` (on-device LLM inference for Gemma 3n)
 - AndroidX libraries for modern Android development
 - Kotlin support with Java interop
 
@@ -83,10 +87,18 @@ The notification interception system includes:
 
 ## Engine Configuration
 
-The app supports four AI engines selected via radio buttons:
+The app supports five AI engines selected via radio buttons:
 - **CLAUDE**: Cloud-based Claude AI analysis (`claude-sonnet-4-6` by default, configurable)
 - **GEMINI**: Google Gemini integration (`gemini-2.5-flash` by default, configurable)
 - **OPENROUTER**: OpenRouter cloud proxy (user-configurable model)
 - **TENSORFLOW**: Local MediaPipe processing (default for backward compatibility; class/key name kept as `TENSORFLOW`)
+- **GEMMA3N**: Local on-device Gemma 3n via LiteRT-LM (**temporarily disabled** — radio buttons hidden with `visibility="gone"`, ConfigActivity section wrapped in a hidden container; all engine code is intact and ready to re-enable)
 
 Engine selection is persisted using `SharedPreferencesHelper` and each engine implements the `AIImageAnalyzer` interface for consistency.
+
+## Model File Handling
+
+- `Util.getModelPathFromUri()` resolves content URIs to filesystem paths using 4 strategies (MediaStore DATA, DownloadsProvider msf: lookup, /proc/self/fd symlink, DISPLAY_NAME in Download dirs)
+- `Util.isModelFileAccessible()` uses `canRead() || exists()` to handle Android 11+ scoped storage
+- `ConfigActivity` prompts for `MANAGE_EXTERNAL_STORAGE` permission when a picked file isn't directly readable
+- ABI filters: `armeabi-v7a` and `arm64-v8a` only (no x86/x86_64)

@@ -1,19 +1,29 @@
 package online.avogadro.opencv4tasker;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.Settings;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import online.avogadro.opencv4tasker.app.SharedPreferencesHelper;
+import online.avogadro.opencv4tasker.app.Util;
 
 public class ConfigActivity extends AppCompatActivity {
 
     private static final String TAG = "ConfigActivity";
+    private static final int REQUEST_PICK_GEMMA_MODEL = 2001;
+    private static final String GEMMA3N_HUGGINGFACE_URL =
+            "https://huggingface.co/google/gemma-3n-E2B-it-litert-lm/resolve/main/gemma-3n-E2B-it-int4.litertlm";
 
     // Known model IDs for the spinners. The last entry ("") signals Custom.
     private static final String[] CLAUDE_MODEL_IDS = {
@@ -26,10 +36,13 @@ public class ConfigActivity extends AppCompatActivity {
     private static final String[] GEMINI_MODEL_IDS = {
             "gemini-2.5-flash",
             "gemini-2.5-pro",
-            "gemini-3-pro-preview",
+            "gemini-3-flash-preview",
             "gemini-3.1-pro-preview",
             ""
     };
+    /** Deprecated model ID kept for backward-compat migration. */
+    private static final String GEMINI_DEPRECATED_3_PRO = "gemini-3-pro-preview";
+    private static final String GEMINI_REPLACEMENT_3_PRO = "gemini-3.1-pro-preview";
 
     EditText claudeApiKey;
     Spinner  claudeModelSpinner;
@@ -41,6 +54,8 @@ public class ConfigActivity extends AppCompatActivity {
 
     EditText openRouterApiKey;
     EditText openRouterModel;
+
+    TextView gemma3nModelPathLabel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,7 +122,7 @@ public class ConfigActivity extends AppCompatActivity {
         String[] geminiNames = {
                 getString(R.string.gemini_model_25_flash),
                 getString(R.string.gemini_model_25_pro),
-                getString(R.string.gemini_model_30_pro_preview),
+                getString(R.string.gemini_model_30_flash_preview),
                 getString(R.string.gemini_model_31_pro_preview),
                 getString(R.string.model_custom)
         };
@@ -117,6 +132,10 @@ public class ConfigActivity extends AppCompatActivity {
         geminiModelSpinner.setAdapter(geminiAdapter);
 
         String savedGeminiModel = SharedPreferencesHelper.get(this, SharedPreferencesHelper.GEMINI_MODEL);
+        if (GEMINI_DEPRECATED_3_PRO.equals(savedGeminiModel)) {
+            savedGeminiModel = GEMINI_REPLACEMENT_3_PRO;
+            SharedPreferencesHelper.save(this, SharedPreferencesHelper.GEMINI_MODEL, savedGeminiModel);
+        }
         if (savedGeminiModel == null || savedGeminiModel.isEmpty()) {
             geminiModelSpinner.setSelection(0); // nessuna preferenza salvata → default (2.5 Flash)
         } else {
@@ -150,6 +169,23 @@ public class ConfigActivity extends AppCompatActivity {
         else
             openRouterModel.setText(SharedPreferencesHelper.DEFAULT_OPENROUTER_MODEL);
 
+        // --- Gemma 3n ---
+        gemma3nModelPathLabel = findViewById(R.id.gemma3nModelPathLabel);
+        String savedGemma3nPath = SharedPreferencesHelper.get(this, SharedPreferencesHelper.GEMMA3N_MODEL_PATH);
+        updateGemma3nPathLabel(savedGemma3nPath);
+
+        findViewById(R.id.buttonGemma3nDownload).setOnClickListener(v -> {
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(GEMMA3N_HUGGINGFACE_URL));
+            startActivity(browserIntent);
+        });
+
+        findViewById(R.id.buttonGemma3nSelect).setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("*/*");
+            startActivityForResult(intent, REQUEST_PICK_GEMMA_MODEL);
+        });
+
         // --- Save button ---
         findViewById(R.id.buttonSave).setOnClickListener(v -> {
             SharedPreferencesHelper.save(this, SharedPreferencesHelper.CLAUDE_API_KEY,
@@ -179,6 +215,44 @@ public class ConfigActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode != RESULT_OK || data == null) return;
+        Uri uri = data.getData();
+        if (uri == null) return;
+
+        // Take persistent permission
+        try {
+            getContentResolver().takePersistableUriPermission(
+                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        } catch (Exception ignored) { }
+
+        String resolvedPath = Util.getModelPathFromUri(this, uri);
+        String pathOrUri = resolvedPath != null ? resolvedPath : uri.toString();
+
+        String unresolvedWarning = "\n(Attenzione: impossibile risolvere il path dal content URI. "
+                + "Verifica che l'app abbia il permesso \"Accesso a tutti i file\" oppure sposta il file nella cartella Download.)";
+
+        if (requestCode == REQUEST_PICK_GEMMA_MODEL) {
+            SharedPreferencesHelper.save(this, SharedPreferencesHelper.GEMMA3N_MODEL_PATH, pathOrUri);
+            updateGemma3nPathLabel(pathOrUri);
+            if (resolvedPath == null) {
+                gemma3nModelPathLabel.setText("URI: " + pathOrUri + unresolvedWarning);
+            } else if (!new java.io.File(resolvedPath).canRead()) {
+                requestAllFilesAccessIfNeeded();
+            }
+        }
+    }
+
+    private void updateGemma3nPathLabel(String path) {
+        if (path == null || path.isEmpty()) {
+            gemma3nModelPathLabel.setText("Path modello: (non configurato)");
+        } else {
+            gemma3nModelPathLabel.setText("Path modello: " + path);
+        }
+    }
+
     /** Returns the index of modelId in modelIds (excluding the last "Custom" entry), or -1. */
     private int findModelIndex(String modelId, String[] modelIds) {
         if (modelId == null || modelId.isEmpty()) return -1;
@@ -186,6 +260,17 @@ public class ConfigActivity extends AppCompatActivity {
             if (modelIds[i].equals(modelId)) return i;
         }
         return -1;
+    }
+
+    private void requestAllFilesAccessIfNeeded() {
+        if (!Environment.isExternalStorageManager()) {
+            Toast.makeText(this,
+                    "Per usare modelli locali, abilita \"Accesso a tutti i file\" nella schermata che si aprirà.",
+                    Toast.LENGTH_LONG).show();
+            Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                    Uri.parse("package:" + getPackageName()));
+            startActivity(intent);
+        }
     }
 
     @Override

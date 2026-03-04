@@ -14,14 +14,15 @@ android {
         applicationId "online.avogadro.opencv4tasker"
         minSdkVersion 30
         targetSdkVersion 36
-        versionCode 1700
-        versionName "1.7.0"
+        versionCode 1800
+        versionName "1.8.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
 
         ndk {
-            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+            abiFilters 'armeabi-v7a', 'arm64-v8a'
         }
+
     }
     buildTypes {
         release {
@@ -87,6 +88,9 @@ dependencies {
 
     // Tasker plugin
     implementation 'com.joaomgcd:taskerpluginlibrary:0.4.10'
+
+    // LiteRT-LM: on-device LLM inference (for Gemma 3n local engine)
+    implementation 'com.google.ai.edge.litertlm:litertlm-android:0.8.0'
 
 
 }

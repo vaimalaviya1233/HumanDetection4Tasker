@@ -63,6 +63,8 @@ public class HumansDetectorGemini implements AIImageAnalyzer {
     public void setup(Context ctx) throws IOException {
         API_KEY = SharedPreferencesHelper.get(ctx, SharedPreferencesHelper.GEMINI_API_KEY);
         String savedModel = SharedPreferencesHelper.get(ctx, SharedPreferencesHelper.GEMINI_MODEL);
+        if ("gemini-3-pro-preview".equals(savedModel))
+            savedModel = "gemini-3.1-pro-preview";
         if (savedModel != null && !savedModel.isEmpty())
             model = savedModel;
     }
