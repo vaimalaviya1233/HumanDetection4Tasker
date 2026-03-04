@@ -54,7 +54,7 @@ class HumansDetectorGemma3n : AIImageAnalyzer {
         if (path.isNullOrEmpty()) {
             throw IOException("Gemma 3n model path not configured. Please set it in Settings.")
         }
-        if (!File(path).exists()) {
+        if (!Util.isModelFileAccessible(path)) {
             throw IOException("Gemma 3n model file not found at: $path")
         }
         modelPath = path
