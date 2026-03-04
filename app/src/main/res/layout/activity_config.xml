@@ -197,60 +197,67 @@
 
         </LinearLayout>
 
-        <!-- ═══ GEMMA 3n ═══ -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="8dp"
-            android:background="#CCCCCC" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            android:text="Gemma 3n (locale)"
-            android:textStyle="bold"
-            android:textSize="16sp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            android:textSize="12sp"
-            android:text="Modello VLM on-device (~3.4 GB). Scarica il file .litertlm da HuggingFace e selezionalo qui sotto." />
-
-        <TextView
-            android:id="@+id/gemma3nModelPathLabel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Path modello: (non configurato)"
-            android:textSize="12sp"
-            android:textColor="#555555" />
-
+        <!-- ═══ GEMMA 3n ═══ (temporarily disabled - crashes at runtime, needs investigation) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="8dp">
+            android:orientation="vertical"
+            android:visibility="gone">
 
-            <Button
-                android:id="@+id/buttonGemma3nDownload"
-                android:layout_width="0dp"
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:background="#CCCCCC" />
+
+            <TextView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="4dp"
-                android:text="Scarica da HuggingFace" />
+                android:layout_marginBottom="4dp"
+                android:text="Gemma 3n (locale)"
+                android:textStyle="bold"
+                android:textSize="16sp" />
 
-            <Button
-                android:id="@+id/buttonGemma3nSelect"
-                android:layout_width="0dp"
+            <TextView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="4dp"
-                android:text="Seleziona file" />
+                android:layout_marginBottom="4dp"
+                android:textSize="12sp"
+                android:text="Modello VLM on-device (~3.4 GB). Scarica il file .litertlm da HuggingFace e selezionalo qui sotto." />
 
+            <TextView
+                android:id="@+id/gemma3nModelPathLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Path modello: (non configurato)"
+                android:textSize="12sp"
+                android:textColor="#555555" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+
+                <Button
+                    android:id="@+id/buttonGemma3nDownload"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    android:text="Scarica da HuggingFace" />
+
+                <Button
+                    android:id="@+id/buttonGemma3nSelect"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:text="Seleziona file" />
+
+            </LinearLayout>
         </LinearLayout>
 
         <Button

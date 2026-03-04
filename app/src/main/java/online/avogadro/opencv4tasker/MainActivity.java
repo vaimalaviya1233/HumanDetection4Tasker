@@ -80,12 +80,12 @@ public class MainActivity extends AppCompatActivity {
         boolean hasOpenRouterKey = !"".equals(SharedPreferencesHelper.get(this, SharedPreferencesHelper.OPENROUTER_API_KEY));
         openRouterButton.setEnabled(hasOpenRouterKey);
         
-        // Check Gemma 3n model availability
-        RadioButton gemma3nButton = findViewById(R.id.radioEngineGemma3n);
-        String gemma3nPath = SharedPreferencesHelper.get(this, SharedPreferencesHelper.GEMMA3N_MODEL_PATH);
-        boolean hasGemma3n = Util.isModelFileAccessible(gemma3nPath);
-        gemma3nButton.setEnabled(hasGemma3n);
-        gemma3nButton.setText(hasGemma3n ? R.string.engine_gemma3n : R.string.engine_gemma3n_disabled);
+        // Gemma 3n: temporarily disabled (crashes at runtime, needs investigation)
+        // RadioButton gemma3nButton = findViewById(R.id.radioEngineGemma3n);
+        // String gemma3nPath = SharedPreferencesHelper.get(this, SharedPreferencesHelper.GEMMA3N_MODEL_PATH);
+        // boolean hasGemma3n = Util.isModelFileAccessible(gemma3nPath);
+        // gemma3nButton.setEnabled(hasGemma3n);
+        // gemma3nButton.setText(hasGemma3n ? R.string.engine_gemma3n : R.string.engine_gemma3n_disabled);
 
         // Show/hide warning message if API keys are missing
         TextView warningTextView = findViewById(R.id.warningTextView);
@@ -133,12 +133,12 @@ public class MainActivity extends AppCompatActivity {
         boolean hasOpenRouterKey = !"".equals(SharedPreferencesHelper.get(this, SharedPreferencesHelper.OPENROUTER_API_KEY));
         openRouterButton.setEnabled(hasOpenRouterKey);
 
-        // Check Gemma 3n model availability
-        RadioButton gemma3nButton = findViewById(R.id.radioEngineGemma3n);
-        String gemma3nPath = SharedPreferencesHelper.get(this, SharedPreferencesHelper.GEMMA3N_MODEL_PATH);
-        boolean hasGemma3n = Util.isModelFileAccessible(gemma3nPath);
-        gemma3nButton.setEnabled(hasGemma3n);
-        gemma3nButton.setText(hasGemma3n ? R.string.engine_gemma3n : R.string.engine_gemma3n_disabled);
+        // Gemma 3n: temporarily disabled (crashes at runtime, needs investigation)
+        // RadioButton gemma3nButton = findViewById(R.id.radioEngineGemma3n);
+        // String gemma3nPath = SharedPreferencesHelper.get(this, SharedPreferencesHelper.GEMMA3N_MODEL_PATH);
+        // boolean hasGemma3n = Util.isModelFileAccessible(gemma3nPath);
+        // gemma3nButton.setEnabled(hasGemma3n);
+        // gemma3nButton.setText(hasGemma3n ? R.string.engine_gemma3n : R.string.engine_gemma3n_disabled);
 
         // Show/hide warning message if API keys are missing
         TextView warningTextView = findViewById(R.id.warningTextView);
